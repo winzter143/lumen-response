@@ -9,5 +9,13 @@
         "illuminate/http": "5.2.*",
         "illuminate/pagination": "5.2.*",
         "illuminate/hashing": "5.2.*"
+    },
+    "autoload": {
+        "psr-4": {
+            "F3\\": "src"
+        },
+        "files": [
+            "src/helpers.php"
+        ]
     }
 }
