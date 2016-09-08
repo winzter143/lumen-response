@@ -1,5 +1,5 @@
 {
-    "name": "f3/lib",
+    "name": "f3/core",
     "description": "F3 shared components and libraries.",
     "require": {
         "php": ">=5.5.9",
