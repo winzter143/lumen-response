@@ -85,7 +85,7 @@ class Party extends Model
         if ($result) {
             // Merge the results.
             $result = array_merge($result, ['api_key' => $party['api_key'], 'secret_key' => $party['secret_key'], 'type' => $party['type']]);
-            $object = '\App\Models\\' . ucfirst($party['type']);
+            $object = '\F3\Models\\' . ucfirst($party['type']);
             return new $object($result);
         } else {
             return false;

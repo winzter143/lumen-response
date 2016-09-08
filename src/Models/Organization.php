@@ -10,7 +10,7 @@ class Organization extends Model
      * RBAC trait.
      * This class is shared between the User and Organization models.
      */
-    use \App\Components\RBAC;
+    use \F3\Components\RBAC;
     
     /**
      * The table associated with the model.

@@ -108,7 +108,7 @@ abstract class Courier
             $courier['metadata'] = ($courier['metadata']) ? $courier['metadata'] : [];
 
             // Instantiate the class.
-            $class = 'App\Components\Couriers\\' . self::$couriers[self::classKey($courier['name'])];
+            $class = 'F3\Components\Couriers\\' . self::$couriers[self::classKey($courier['name'])];
             return new $class($courier['party_id'], $courier['name'], $courier['warehouse'], $courier['metadata']);
         }, $couriers);
     }

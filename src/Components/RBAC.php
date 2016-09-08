@@ -55,7 +55,7 @@ trait RBAC
      */
     public function getType()
     {
-        return strtolower(str_replace('App\Models\\', '', __CLASS__));
+        return strtolower(str_replace('F3\Models\\', '', __CLASS__));
     }
 
     /**
