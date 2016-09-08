@@ -1,0 +1,13 @@
+{
+    "name": "f3/lib",
+    "description": "F3 shared components and libraries.",
+    "require": {
+        "php": ">=5.5.9",
+        "illuminate/cache": "5.2.*",
+        "illuminate/database": "5.2.*",
+        "illuminate/validation": "5.2.*",
+        "illuminate/http": "5.2.*",
+        "illuminate/pagination": "5.2.*",
+        "illuminate/hashing": "5.2.*"
+    }
+}
