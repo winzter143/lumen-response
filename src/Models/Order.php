@@ -374,16 +374,16 @@ class Order extends Model
     }
 
     /**
-     * Updates the order status to "in_transit" and sets the pickup date.
+     * Updates the order status to "picked_up" and sets the pickup date.
      */
-    public function inTransit($pickup_date, $remarks = null)
+    public function pickedUp($pickup_date, $remarks = null)
     {
         try {
             // Start the transaction.
             DB::beginTransaction();
 
             // Set the status.
-            $this->setStatus('in_transit', $remarks);
+            $this->setStatus('picked_up', $remarks);
 
             // Set the pick up date.
             $this->pickup_date = $pickup_date;
@@ -443,6 +443,14 @@ class Order extends Model
         }
     }
 
+    /**
+     * Updates the order status to "in_transit".
+     */
+    public function inTransit($remarks = null)
+    {
+        return $this->setStatus('in_transit', $remarks);
+    }
+    
     /**
      * Sets the order status to "pending".
      */
