@@ -3,19 +3,30 @@
     "description": "F3 shared components and libraries.",
     "require": {
         "php": ">=5.5.9",
-        "illuminate/cache": "5.3.*",
-        "illuminate/database": "5.3.*",
-        "illuminate/validation": "5.3.*",
-        "illuminate/http": "5.3.*",
-        "illuminate/pagination": "5.3.*",
-        "illuminate/hashing": "5.3.*"
+        "laravel/lumen-framework": "5.3.*",
+        "vlucas/phpdotenv": "~2.2",
+        "aws/aws-sdk-php": "~3.0",
+        "predis/predis": "~1.0",
+        "illuminate/redis": "5.3.*",
+        "illuminate/cookie": "^5.3"
+    },
+    "require-dev": {
+        "fzaninotto/faker": "~1.4",
+        "phpunit/phpunit": "~4.0"
     },
     "autoload": {
         "psr-4": {
-            "F3\\": "src"
+            "F3\\": "src",
+            "App\\": "app/"
         },
         "files": [
             "src/helpers.php"
+        ]
+    },
+    "autoload-dev": {
+        "classmap": [
+            "tests/",
+            "database/"
         ]
     }
 }

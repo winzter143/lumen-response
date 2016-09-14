@@ -32,6 +32,15 @@ class Wallet extends Model
     }
 
     /**
+     * This is just a sample function for testing phpunit.
+     * Please remove after testing.
+     */
+    public static function example($bool)
+    {
+        return $bool;
+    }
+
+    /**
      * Transfers funds between wallets.
      */
     public static function transfer($from_party_id, $to_party_id, $from_type, $to_type, $currency_id, $amount, $transfer_type, $details, $order_id = null)
