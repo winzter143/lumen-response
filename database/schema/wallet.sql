@@ -15,9 +15,9 @@ CREATE TABLE wallet."wallets" (
   "max_limit" numeric(14,2) DEFAULT 0.00,
   "status" smallint NOT NULL  DEFAULT 1,
   "created_by" integer ,
-  "creation_date" timestamp with time zone NOT NULL DEFAULT current_timestamp ,
-  "modified_by" integer ,
-  "modification_date" timestamp with time zone ,
+  "created_at" timestamp with time zone NOT NULL DEFAULT current_timestamp ,
+  "updated_by" integer ,
+  "updated_at" timestamp with time zone ,
   PRIMARY KEY ("id") ,
   CONSTRAINT wallets_currency_id_fk FOREIGN KEY (currency_id) REFERENCES core.currencies (id) ON DELETE NO ACTION ON UPDATE NO ACTION ,
   CONSTRAINT wallets_party_id_fk FOREIGN KEY (party_id) REFERENCES core.parties (id) ON DELETE NO ACTION ON UPDATE NO ACTION
@@ -41,7 +41,7 @@ CREATE TABLE wallet."transfers" (
   "details" text NOT NULL ,
   "initiated_by" integer ,
   "order_id" integer ,
-  "creation_date" timestamp with time zone NOT NULL DEFAULT current_timestamp ,
+  "created_at" timestamp with time zone NOT NULL DEFAULT current_timestamp ,
   PRIMARY KEY ("id") ,
   CONSTRAINT transfers_from_wallet_id_fk FOREIGN KEY (from_wallet_id) REFERENCES wallet.wallets (id) ON DELETE NO ACTION ON UPDATE NO ACTION ,
   CONSTRAINT transfers_to_wallet_id_fk FOREIGN KEY (to_wallet_id) REFERENCES wallet.wallets (id) ON DELETE NO ACTION ON UPDATE NO ACTION ,
@@ -50,7 +50,7 @@ CREATE TABLE wallet."transfers" (
 CREATE INDEX "transfers_idx_transfers_type" ON wallet."transfers" ("type");
 CREATE INDEX "transfers_idx_transfers_from_wallet_id" ON wallet."transfers" ("from_wallet_id");
 CREATE INDEX "transfers_idx_transfers_to_wallet_id" ON wallet."transfers" ("to_wallet_id");
-CREATE INDEX "transfers_idx_transfers_creation_date" ON wallet."transfers" ("creation_date");
+CREATE INDEX "transfers_idx_transfers_created_at" ON wallet."transfers" ("created_at");
 
 --
 -- Table structure for table wallet_logs
