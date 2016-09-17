@@ -76,7 +76,13 @@ class User extends Model
             ->select('r.name', 'r.permissions')
             ->join('core.roles as r', 'r.id', '=', 'pr.role_id')
             ->where([['pr.party_id', $user['party_id']]])
-            ->pluck('permissions', 'name');
+            ->pluck('permissions', 'name')
+            ->toArray();
+
+        // Check if the user has roles.
+        if (!$user['roles']) {
+            throw new \Exception('The role that you provided is not assigned to the user.', 401);
+        }
 
         // Check the role.
         if (!in_array($role, array_keys($user['roles']))) {
