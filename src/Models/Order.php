@@ -486,7 +486,29 @@ class Order extends Model
      */
     public function delivered($remarks = null)
     {
-        return $this->setStatus('delivered', $remarks);
+        try {
+            // Start the transaction.
+            DB::beginTransaction();
+            
+            // Set the status.
+            $this->setStatus('delivered', $remarks);
+
+            // Set the delivery date.
+            $this->delivery_date = DB::raw('now()');
+            $result = $this->save();
+
+            if (!$result) {
+                throw new \Exception('Unable to update pickup date.');
+            }
+
+            // Commit.
+            DB::commit();
+            return $this;
+        } catch (\Exception $e) {
+            // Rollback and return the error.
+            DB::rollback();
+            throw $e;
+        }
     }
 
     /**
