@@ -46,6 +46,7 @@ CREATE TABLE consumer.orders
   created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_by INT,
   updated_at TIMESTAMP WITH TIME ZONE,
+  delivery_date TIMESTAMP WITH TIME ZONE,
   pickup_date TIMESTAMP WITH TIME ZONE,
   pickup_attempts SMALLINT NOT NULL DEFAULT 0,
   last_status_update TIMESTAMP WITH TIME ZONE,
@@ -168,4 +169,26 @@ CREATE TABLE consumer.charges
   CONSTRAINT charges_order_id_fk FOREIGN KEY (order_id) REFERENCES consumer.orders(id) ON DELETE NO ACTION ON UPDATE NO ACTION,
   CONSTRAINT charges_collector_party_id_fk FOREIGN KEY (collector_party_id) REFERENCES core.parties(id) ON DELETE NO ACTION ON UPDATE NO ACTION,
   CONSTRAINT charges_deposit_id_fk FOREIGN KEY (deposit_id) REFERENCES consumer.deposits(id) ON DELETE NO ACTION ON UPDATE NO ACTION
+);
+
+--
+-- Table structure for table claims
+--
+CREATE TYPE consumer.claim_status AS ENUM ('pending', 'verified', 'settled', 'declined');
+CREATE TABLE consumer.claims
+(
+  order_id INT NOT NULL,
+  status consumer.claim_status NOT NULL DEFAULT 'pending',
+  reason TEXT NOT NULL,
+  amount NUMERIC(14, 2) NOT NULL,
+  shipping_fee_flag SMALLINT NOT NULL DEFAULT 0,
+  insurance_fee_flag SMALLINT NOT NULL DEFAULT 0,
+  service_fee_flag SMALLINT NOT NULL DEFAULT 0,
+  documentary_proof_url TEXT,
+  created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  created_by INT,
+  updated_at TIMESTAMP WITH TIME ZONE,
+  updated_by INT,
+  PRIMARY KEY (order_id),
+  CONSTRAINT claims_order_id_fk FOREIGN KEY (order_id) REFERENCES consumer.orders(id) ON DELETE NO ACTION ON UPDATE NO ACTION
 );

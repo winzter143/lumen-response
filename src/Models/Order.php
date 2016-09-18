@@ -513,6 +513,13 @@ class Order extends Model
         return $this->setStatus('failed_return', $remarks);
     }
 
+    /**
+     * Claims an order.
+     */
+    public function claim($amount, $reason, $documentary_proof_url = null, $shipping_fee_flag = 0, $insurance_fee_flag = 0, $service_fee_flag = 0, $status = 'pending')
+    {
+        return Claim::store($this->id, $amount, $reason, $documentary_proof_url, $shipping_fee_flag, $insurance_fee_flag, $service_fee_flag, $status);
+    }
 
     /**
      * Checks if a pickup can be retried based on the client's contract.
