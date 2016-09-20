@@ -4,7 +4,7 @@ CREATE SCHEMA wallet;
 --
 -- Table structure for table wallets
 --
-CREATE TYPE wallet."wallets_enum_type" as enum('fund', 'sales', 'settlement', 'cod');
+CREATE TYPE wallet."wallets_enum_type" as enum('fund', 'sales', 'settlement', 'collections');
 CREATE TABLE wallet."wallets" (
   "id" serial ,
   "party_id" integer NOT NULL ,
