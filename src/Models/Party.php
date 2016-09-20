@@ -73,7 +73,8 @@ class Party extends Model
             ->select('r.name', 'r.permissions')
             ->join('core.roles as r', 'r.id', '=', 'pr.role_id')
             ->where([['pr.party_id', $result['party_id']]])
-            ->pluck('permissions', 'name');
+            ->pluck('permissions', 'name')
+            ->toArray();
 
         // Decode the permissions.
         if ($result['roles']) {

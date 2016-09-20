@@ -42,8 +42,8 @@ class OrderSegment extends Model
             'reference_id' => 'string|required|max:100',
             'pickup_address_id' => 'integer|required|exists:pgsql.core.addresses,id',
             'delivery_address_id' => 'integer|required|exists:pgsql.core.addresses,id',
-            'start_date' => 'string',
-            'end_date' => 'string',
+            'start_date' => 'string|nullable',
+            'end_date' => 'string|nullable',
             'flagged' => 'integer|required|in:0,1'
         ];
     }

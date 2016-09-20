@@ -32,13 +32,13 @@ class Charge extends Model
             'order_id' => 'integer|required|exists:pgsql.consumer.orders,id',
             'status' => 'string|required|in:created,assigned,paid,remitted,paid_out',
             'payment_method' => 'string|required|in:' . implode(',', array_keys(config('settings.payment_methods'))),
-            'collector_party_id' => 'integer|exists:pgsql.core.parties,id',
-            'deposit_id' => 'integer|exists:pgsql.consumer.deposits,id',
+            'collector_party_id' => 'integer|nullable|exists:pgsql.core.parties,id',
+            'deposit_id' => 'integer|nullable|exists:pgsql.consumer.deposits,id',
             'total_amount' => 'numeric|required|min:0|max:999999999999.99',
             'tendered_amount' => 'numeric|required|min:0|max:999999999999.99',
             'change_amount' => 'numeric|required|min:0|max:999999999999.99',
-            'remarks' => 'string',
-            'updated_by' => 'integer|exists:pgsql.core.users,party_id'
+            'remarks' => 'string|nullable',
+            'updated_by' => 'integer|nullable|exists:pgsql.core.users,party_id'
         ];
     }
 

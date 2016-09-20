@@ -35,7 +35,7 @@ class OrderItem extends Model
             'amount' => 'numeric|required|min:0|max:999999999999.99',
             'quantity' => 'integer|required|min:1',
             'total' => 'numeric|required|min:0|max:999999999999.99',
-            'metadata' => 'json'
+            'metadata' => 'json|nullable'
         ];
     }
 

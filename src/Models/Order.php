@@ -41,10 +41,10 @@ class Order extends Model
             'tax' => 'numeric|required|min:0|max:999999999999.99',
             'fee' => 'numeric|required|min:0|max:999999999999.99',
             'grand_total' => 'numeric|required|min:0|max:999999999999.99',
-            'metadata' => 'json',
-            'ip_address' => 'ip',
-            'preferred_pickup_time' => 'string|max:100',
-            'preferred_delivery_time' => 'string|max:100',
+            'metadata' => 'json|nullable',
+            'ip_address' => 'ip|nullable',
+            'preferred_pickup_time' => 'string|nullable|max:100',
+            'preferred_delivery_time' => 'string|nullable|max:100',
             'flagged' => 'integer|in:0,1'
         ];
 
@@ -69,6 +69,7 @@ class Order extends Model
      */
     public static function store($org_party_id, $pickup_address, $delivery_address, $buyer_name, $email, $contact_number, $grand_total, $total_collected = 0, $payment_method = null, $items = [], $currency = 'PHP', $reference_id = null, $metadata = null, $preferred_pickup_time = null, $preferred_delivery_time = null, $ip_address = null)
     {
+
         try {
             // Start the transaction.
             DB::beginTransaction();
@@ -175,8 +176,13 @@ class Order extends Model
                 // The order is ready for pick up.
                 $order->forPickup();
             } catch (\Exception $e) {
-                // Flag the order.
-                $order->flag();
+                if (isset($e->validator)) {
+                    // There was a validation error.
+                    throw $e;
+                } else {
+                    // Flag the order.
+                    $order->flag();
+                }
             }
 
             // Commit and return the order.
@@ -480,7 +486,29 @@ class Order extends Model
      */
     public function delivered($remarks = null)
     {
-        return $this->setStatus('delivered', $remarks);
+        try {
+            // Start the transaction.
+            DB::beginTransaction();
+            
+            // Set the status.
+            $this->setStatus('delivered', $remarks);
+
+            // Set the delivery date.
+            $this->delivery_date = DB::raw('now()');
+            $result = $this->save();
+
+            if (!$result) {
+                throw new \Exception('Unable to update pickup date.');
+            }
+
+            // Commit.
+            DB::commit();
+            return $this;
+        } catch (\Exception $e) {
+            // Rollback and return the error.
+            DB::rollback();
+            throw $e;
+        }
     }
 
     /**
@@ -507,6 +535,13 @@ class Order extends Model
         return $this->setStatus('failed_return', $remarks);
     }
 
+    /**
+     * Claims an order.
+     */
+    public function claim($amount, $reason, $documentary_proof_url = null, $shipping_fee_flag = 0, $insurance_fee_flag = 0, $service_fee_flag = 0, $status = 'pending')
+    {
+        return Claim::store($this->id, $amount, $reason, $documentary_proof_url, $shipping_fee_flag, $insurance_fee_flag, $service_fee_flag, $status);
+    }
 
     /**
      * Checks if a pickup can be retried based on the client's contract.
