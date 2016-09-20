@@ -55,11 +55,16 @@ class Model extends EloquentModel
      */
     public function save(array $options = [])
     {
-        // Validate the data before saving.
-        $this->validate();
+        try {
+            // Validate the data before saving.
+            // This will throw a ValidationException on error.
+            $this->validate();
 
-        // Save the data.
-        return parent::save($options);
+            // Save the record.
+            return parent::save($options);
+        } catch (\Exception $e) {
+            throw $e;
+        }
     }
 
     /**

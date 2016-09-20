@@ -69,7 +69,6 @@ class Order extends Model
      */
     public static function store($org_party_id, $pickup_address, $delivery_address, $buyer_name, $email, $contact_number, $grand_total, $total_collected = 0, $payment_method = null, $items = [], $currency = 'PHP', $reference_id = null, $metadata = null, $preferred_pickup_time = null, $preferred_delivery_time = null, $ip_address = null)
     {
-
         try {
             // Start the transaction.
             DB::beginTransaction();
@@ -319,12 +318,6 @@ class Order extends Model
         // Update the active segment.
         $this->active_segment_id = $segment_id;
         $result = $this->save();
-
-        if ($result) {
-            return $this;
-        } else {
-            throw new \Exception('Unable to update active segment ID.');
-        }
     }
 
     /**
@@ -335,12 +328,6 @@ class Order extends Model
         // Update the flag value.
         $this->flagged = 1;
         $result = $this->save();
-
-        if ($result) {
-            return $this;
-        } else {
-            throw new \Exception('Unable to flag the order.');
-        }
     }
 
     /**
@@ -361,10 +348,6 @@ class Order extends Model
             $this->status = $status;
             $this->last_status_update = DB::raw('now()');
             $result = $this->save();
-
-            if (!$result) {
-                throw new \Exception('Unable to update order status.');
-            }
 
             // Create an order event.
             $this->addEvent($status, $remarks);
@@ -394,10 +377,6 @@ class Order extends Model
             // Set the pick up date.
             $this->pickup_date = $pickup_date;
             $result = $this->save();
-
-            if (!$result) {
-                throw new \Exception('Unable to update pickup date.');
-            }
 
             // Look for the next segment.
             $next_segment = DB::table('consumer.order_segments')->where([['order_id', $this->id], ['id', '>', $this->active_segment_id]])->limit(1)->first();
@@ -433,10 +412,6 @@ class Order extends Model
             if ($increment) {
                 $this->pickup_attempts = DB::raw('pickup_attempts + 1');
                 $result = $this->save();
-
-                if (!$result) {
-                    throw new \Exception('Unable to increment the number of pickup attempts.');
-                }
             }
 
             // Commit.
@@ -496,10 +471,6 @@ class Order extends Model
             // Set the delivery date.
             $this->delivery_date = DB::raw('now()');
             $result = $this->save();
-
-            if (!$result) {
-                throw new \Exception('Unable to update pickup date.');
-            }
 
             // Commit.
             DB::commit();
