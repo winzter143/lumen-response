@@ -4,7 +4,7 @@ CREATE SCHEMA wallet;
 --
 -- Table structure for table wallets
 --
-CREATE TYPE wallet."wallets_enum_type" as enum('loyalty', 'payment', 'escrow', 'sales', 'disbursement', 'settlement', 'return');
+CREATE TYPE wallet."wallets_enum_type" as enum('fund', 'sales', 'settlement', 'cod');
 CREATE TABLE wallet."wallets" (
   "id" serial ,
   "party_id" integer NOT NULL ,
@@ -30,17 +30,17 @@ CREATE INDEX "wallets_idx_wallets_currency_id" ON wallet."wallets" ("currency_id
 --
 -- Table structure for table transfers
 --
-CREATE TYPE wallet."transfers_enum_type" as enum('purchase','transfer','refund','reward','escrow','disbursement', 'settlement');
+CREATE TYPE wallet."transfers_enum_type" as enum('purchase','transfer','refund','reward','escrow','disbursement','settlement');
 CREATE TABLE wallet."transfers" (
   "id" serial ,
   "from_wallet_id" integer NOT NULL ,
   "to_wallet_id" integer NOT NULL ,
   "type" wallet."transfers_enum_type" NOT NULL ,
   "amount" numeric(14,2) NOT NULL ,
-  "ip_address" text NOT NULL ,
   "details" text NOT NULL ,
-  "initiated_by" integer ,
+  "ip_address" text NOT NULL ,
   "order_id" integer ,
+  "created_by" integer ,
   "created_at" timestamp with time zone NOT NULL DEFAULT current_timestamp ,
   PRIMARY KEY ("id") ,
   CONSTRAINT transfers_from_wallet_id_fk FOREIGN KEY (from_wallet_id) REFERENCES wallet.wallets (id) ON DELETE NO ACTION ON UPDATE NO ACTION ,

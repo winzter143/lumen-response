@@ -16,7 +16,7 @@ class Wallet extends Model
      * The attributes that are mass assignable.
      * @var array
      */
-    protected $fillable = [];
+    protected $fillable = ['party_id', 'type', 'currency_id', 'max_limit', 'credit_limit'];
 
     /**
      * The table's primary key.
@@ -24,115 +24,193 @@ class Wallet extends Model
     protected $primaryKey = 'id';
 
     /**
+     * Wallet types.
+     */
+    private const TYPES = ['fund', 'sales', 'settlement', 'cod'];
+    
+    /**
      * Returns the model validation rules.
      */
     public function getRules()
     {
-        return [];
+        return [
+                'party_id' => 'integer|required|exists:pgsql.core.parties,id',
+                'type' => 'string|required|in:' . implode(',', self::TYPES),
+                'currency_id' => 'integer|required|exists:pgsql.core.currencies,id',
+                'max_limit' => 'numeric|required|min:0|max:999999999999.99',
+                'credit_limit' => 'numeric|required|min:-999999999999.99|max:0',
+                ];
     }
 
     /**
-     * This is just a sample function for testing phpunit.
-     * Please remove after testing.
+     * A wallet has wallet logs.
      */
-    public static function example($bool)
+    public function walletLogs()
     {
-        return $bool;
+        return $this->hasMany('F3\Models\WalletLog');
+    }
+    
+    /**
+     * Get the wallet balance.
+     *
+     * @return int
+     */
+    public function getBalance()
+    {
+        return DB::table($this->table)->where($this->primaryKey, $this->id)->value('amount');
+    }
+
+    /**
+     * Creates a wallet.
+     * 
+     * @param int    $party_id
+     * @param string $type
+     * @param string $currency
+     * @param int    $max_limit
+     * @param int    $credit_limit
+     */
+    public static function store($party_id, $type, $currency = 'PHP', $max_limit = 10000, $credit_limit = 0)
+    {
+        try {
+            // Start the transaction.
+            DB::beginTransaction();
+
+            // Check the currency.
+            $currency_id = DB::table('core.currencies')->where('code', $currency)->value('id');
+
+            if (!$currency_id) {
+                throw new \Exception('The selected currency code is invalid.', 422);
+            }
+            
+            // The attributes to be saved.
+            $attributes = [
+                           'party_id' => $party_id,
+                           'type' => $type,
+                           'currency_id' => $currency_id,
+                           'max_limit' => $max_limit,
+                           'credit_limit' => $credit_limit
+                           ];
+
+            // Create the wallet.
+            $wallet = self::create($attributes);
+
+            // Commit and return the wallet.
+            DB::commit();
+            return $wallet;
+        } catch (\Exception $e) {
+            // Rollback and return the error.
+            DB::rollback();
+            throw $e;
+        }
     }
 
     /**
      * Transfers funds between wallets.
      */
-    public static function transfer($from_party_id, $to_party_id, $from_type, $to_type, $currency_id, $amount, $transfer_type, $details, $order_id = null)
+    public static function transfer($from_party_id, $to_party_id, $from_type, $to_type, $currency, $amount, $transfer_type, $details, $order_id = null)
     {
-        // Some basic sanity checks.
-        if ($amount <= 0) {
-            throw new Exception('Amount should be greater than 0');
-        } else {
+        try {
+            // Start the transaction.
+            DB::beginTransaction();            
+
             // We only support 2 decimals for transfers.
             $amount = round($amount, 2);
-        }
-        
-        try {
-            // Find out if we're in a transaction, if not, start one.
-            if (!Yii::$app->db->getTransaction()) {
-                $txn = Yii::$app->db->beginTransaction();
+
+            // Some basic sanity checks.
+            if ($amount <= 0) {
+                throw new \Exception('Transfer amount should be greater than 0.', 422);
             }
 
-            // Locate the source wallet.
-            $src_wallet = Wallet::findBySql('SELECT w.* FROM wallet.wallets w JOIN core.parties p on w.party_id = p.id WHERE w.party_id = :from_party_id AND w.type = :from_type AND w.currency_id = :currency_id AND p.status = :party_status and w.status = :wallet_status FOR UPDATE',
-                                            [':from_party_id' => $from_party_id, ':from_type' => $from_type, ':currency_id' => $currency_id, ':party_status' => 1, ':wallet_status' => 1])->one();
+            // Check the currency.
+            $currency_id = DB::table('core.currencies')->where('code', $currency)->value('id');
 
-            if (!$src_wallet) {
-                throw new Exception('Cannot find source wallet');
+            if (!$currency_id) {
+                throw new \Exception('The selected currency code is invalid.', 422);
             }
             
-            // Locate the destination wallet.
-            $dst_wallet = Wallet::findBySql('SELECT w.* FROM wallet.wallets w JOIN core.parties p on w.party_id = p.id WHERE w.party_id = :to_party_id AND w.type = :to_type AND w.currency_id = :currency_id AND p.status = :party_status and w.status = :wallet_status FOR UPDATE',
-                                            [':to_party_id' => $to_party_id, ':to_type' => $to_type, ':currency_id' => $currency_id, ':party_status' => 1, ':wallet_status' => 1])->one();
+            // Locate and LOCK the source wallet.
+            $from_wallet = DB::table('wallet.wallets AS w')
+                         ->select('w.*')
+                         ->join('core.parties AS p', 'w.party_id', 'p.id')
+                         ->where([
+                             ['w.party_id', $from_party_id],
+                             ['w.type', $from_type],
+                             ['w.currency_id', $currency_id],
+                             ['w.status', 1],
+                             ['p.status', 1],
+                         ])
+                         ->lockForUpdate()
+                         ->first();
 
-            if (!$dst_wallet) {
-                throw new Exception('Cannot find destination wallet');
+            if (!$from_wallet) {
+                throw new \Exception('Cannot find source wallet.');
             }
 
+            // Since Eloquent doesn't support lockForUpdate(), we load the model manually.
+            $from_wallet = (new Wallet)->newFromBuilder($from_wallet);
+            
+            // Load the record into a model.  We can't do this directly since 
+            // Locate and LOCK the destination wallet.
+            $to_wallet = DB::table('wallet.wallets AS w')
+                       ->select('w.*')
+                       ->join('core.parties AS p', 'w.party_id', 'p.id')
+                       ->where([
+                           ['w.party_id', $to_party_id],
+                           ['w.type', $to_type],
+                           ['w.currency_id', $currency_id],
+                           ['w.status', 1],
+                           ['p.status', 1],
+                       ])
+                       ->lockForUpdate()
+                       ->first();
+
+            if (!$to_wallet) {
+                throw new \Exception('Cannot find destination wallet.');
+            }
+
+            // Since Eloquent doesn't support lockForUpdate(), we load the model manually.
+            $to_wallet = (new Wallet)->newFromBuilder($to_wallet);
+
             // Ensure that the source and destination wallets are different.
-            if ($src_wallet->id == $dst_wallet->id) {
-                throw new Exception('Source and destination wallets need to be different');
+            if ($from_wallet->id == $to_wallet->id) {
+                throw new \Exception('Source and destination wallets must be different.');
             }
 
             // Compute for the new source and destination amounts.
-            $src_amount = $src_wallet->amount - $amount;
-            $dst_amount = $dst_wallet->amount + $amount;
+            $from_amount = $from_wallet->amount - $amount;
+            $to_amount = $to_wallet->amount + $amount;
 
             // Check the credit limit of the source wallet.
-            if (!is_null($src_wallet->credit_limit) && $src_amount < $src_wallet->credit_limit) {
-                throw new Exception('Credit limit exceeded');
+            if (!is_null($from_wallet->credit_limit) && $from_amount < $from_wallet->credit_limit) {
+                throw new \Exception('Insufficient funds for transfer.');
             }
         
             // Check the max limit of the destination wallet.
-            if (!is_null($dst_wallet->max_limit) && $dst_amount > $dst_wallet->max_limit) {
-                throw new Exception('Max limit exceeded');
+            if (!is_null($to_wallet->max_limit) && $to_amount > $to_wallet->max_limit) {
+                throw new \Exception('Max limit exceeded for transfer.');
             }
             
             // Deduct from the source wallet.
-            $src_wallet->amount = $src_amount;
-            $result = $src_wallet->save();
-
-            // Check for errors
-            if (!$result) {
-                throw new Exception($src_wallet);
-            }
+            $from_wallet->amount = $from_amount;
+            $from_wallet->save();
 
             // Credit the destination wallet.
-            $dst_wallet->amount = $dst_amount;
-            $result = $dst_wallet->save();
+            $to_wallet->amount = $to_amount;
+            $to_wallet->save();
         
-            // Check for errors
-            if (!$result) {
-                throw new Exception($dst_wallet);
-            }
-
             // Log the transfer.
-            $transfer = Transfer::create($src_wallet->id, $dst_wallet->id, $transfer_type, $amount, $details, $order_id);
+            $transfer = Transfer::store($from_wallet->id, $to_wallet->id, $transfer_type, $amount, $details, $order_id);
 
             // Log for each wallet.
-            WalletLog::create($src_wallet->id, $transfer->id, -$amount, $src_wallet->amount);
-            WalletLog::create($dst_wallet->id, $transfer->id, $amount, $dst_wallet->amount);
+            WalletLog::store($from_wallet->id, $transfer->id, -$amount, $from_wallet->amount);
+            WalletLog::store($to_wallet->id, $transfer->id, $amount, $to_wallet->amount);
             
             // Commit if in our own transaction.
-            if (isset($txn)) {
-                $txn->commit();
-            }
-
+            DB::commit();
             return $transfer->id;
-            
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             // Rollback and return the error.
-            // We still need to check for the existence of a transaction in case we are in a nested transaction and
-            // we have been rolled back by a function we called.
-            if (Yii::$app->db->getTransaction()) {
-                Yii::$app->db->getTransaction()->rollback();
-            }
+            DB::rollback();
             throw $e;
         }
     }

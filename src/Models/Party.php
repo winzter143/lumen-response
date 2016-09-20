@@ -16,7 +16,7 @@ class Party extends Model
      * The attributes that are mass assignable.
      * @var array
      */
-    protected $fillable = [];
+    protected $fillable = ['type', 'status', 'metadata'];
 
     /**
      * The table's primary key.
@@ -24,11 +24,20 @@ class Party extends Model
     protected $primaryKey = 'id';
 
     /**
+     * Party types.
+     */
+    private const TYPES = ['user', 'organization'];
+    
+    /**
      * Returns the model validation rules.
      */
     public function getRules()
     {
-        return [];
+        return [
+                'type' => 'string|required|in:' . implode(',', self::TYPES),
+                'status' => 'integer|required|in:0,1',
+                'metadata' => 'json|nullable',
+                ];
     }
 
     /**
@@ -116,14 +125,25 @@ class Party extends Model
     /**
      * Creates a new user.
      */
-    public static function store()
+    public static function store($type, $status = 1, $metadata = null)
     {
         try {
+            // Start the transaction.
+            DB::beginTransaction();
+            
             // Build the attribute list.
-            $attributes = [];
+            $attributes = [
+                           'type' => $type,
+                           'status' => $status,
+                           'metadata' => $metadata
+                           ];
 
-            // Create the user. 
-            return self::create($attributes);
+            // Create the party.
+            $party = self::create($attributes);
+
+            // Commit and return the wallet.
+            DB::commit();
+            return $party;
         } catch (\Exception $e) {
             // Rollback and return the error.
             DB::rollback();
