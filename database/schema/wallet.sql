@@ -38,7 +38,7 @@ CREATE TABLE wallet."transfers" (
   "type" wallet."transfers_enum_type" NOT NULL ,
   "amount" numeric(14,2) NOT NULL ,
   "details" text NOT NULL ,
-  "ip_address" text NOT NULL ,
+  "ip_address" text ,
   "order_id" integer ,
   "created_by" integer ,
   "created_at" timestamp with time zone NOT NULL DEFAULT current_timestamp ,

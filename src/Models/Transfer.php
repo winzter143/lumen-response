@@ -45,7 +45,7 @@ class Transfer extends Model
             'amount' => 'numeric|required|min:0|max:999999999999.99',
             'details' => 'string|required',
             'order_id' => 'integer|nullable|exists:pgsql.consumer.orders,id',
-            'ip_address' => 'ip|required',
+            'ip_address' => 'ip|nullable',
         ];
     }
 
@@ -67,7 +67,7 @@ class Transfer extends Model
      * @param string $details
      * @param int    $order_id
      */
-    public static function store($from_wallet_id, $to_wallet_id, $type, $amount, $details, $order_id = null)
+    public static function store($from_wallet_id, $to_wallet_id, $type, $amount, $details, $order_id = null, $ip_address = null)
     {
         try {
             // Start the transaction.
@@ -81,7 +81,7 @@ class Transfer extends Model
                 'amount' => $amount,
                 'details' => $details,
                 'order_id' => $order_id,
-                'ip_address' => '127.0.0.1',
+                'ip_address' => $ip_address,
             ];
 
             // Create the wallet.
