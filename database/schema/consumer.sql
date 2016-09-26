@@ -185,6 +185,7 @@ CREATE TABLE consumer.claims
   insurance_fee_flag SMALLINT NOT NULL DEFAULT 0,
   service_fee_flag SMALLINT NOT NULL DEFAULT 0,
   documentary_proof_url TEXT,
+  remarks TEXT,
   created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
   created_by INT,
   updated_at TIMESTAMP WITH TIME ZONE,
