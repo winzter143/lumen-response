@@ -26,7 +26,7 @@ class Wallet extends Model
     /**
      * Wallet types.
      */
-    private const TYPES = ['fund', 'sales', 'settlement', 'cod'];
+    private const TYPES = ['fund', 'sales', 'settlement', 'collections'];
     
     /**
      * Returns the model validation rules.
@@ -106,8 +106,19 @@ class Wallet extends Model
 
     /**
      * Transfers funds between wallets.
+     *
+     * @param int    $from_party_id
+     * @param int    $to_party_id
+     * @param string $from_type
+     * @param string $to_type
+     * @param string $currency
+     * @param int    $amount
+     * @param string $transfer_type
+     * @param string $details
+     * @param int    $order_id
+     * @param string $ip_address
      */
-    public static function transfer($from_party_id, $to_party_id, $from_type, $to_type, $currency, $amount, $transfer_type, $details, $order_id = null)
+    public static function transfer($from_party_id, $to_party_id, $from_type, $to_type, $currency, $amount, $transfer_type, $details, $order_id = null, $ip_address = null)
     {
         try {
             // Start the transaction.
