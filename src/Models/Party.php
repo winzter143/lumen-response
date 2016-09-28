@@ -26,7 +26,7 @@ class Party extends Model
     /**
      * Party types.
      */
-    private const TYPES = ['user', 'organization'];
+    const TYPES = ['user', 'organization'];
     
     /**
      * Returns the model validation rules.
