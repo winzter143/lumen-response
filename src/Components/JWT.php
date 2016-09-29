@@ -27,7 +27,9 @@ class JWT
         }
 
         // Add iat to the payload.
-        $payload['iat'] = time();
+        if (!isset($payload['iat'])) {
+            $payload['iat'] = time();
+        }
 
         // Check the payload.
         if (!self::checkPayload($payload)) {
