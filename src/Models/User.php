@@ -71,28 +71,16 @@ class User extends Model
             throw new \Exception('The user is not a member of the system organization.', 401);
         }
 
-        // Get the roles.
-        $user['roles'] = DB::table('core.party_roles as pr')
-            ->select('r.name', 'r.permissions')
-            ->join('core.roles as r', 'r.id', '=', 'pr.role_id')
-            ->where([['pr.party_id', $user['party_id']]])
-            ->pluck('permissions', 'name')
-            ->toArray();
-
-        // Check if the user has roles.
-        if (!$user['roles']) {
-            throw new \Exception('The role that you provided is not assigned to the user.', 401);
-        }
-
         // Check the role.
-        if (!in_array($role, array_keys($user['roles']))) {
+        $result = DB::table('core.party_roles as pr')
+            ->join('core.roles as r', 'r.id', '=', 'pr.role_id')
+            ->join('core.parties as p', 'p.id', '=', 'pr.party_id')
+            ->where([['pr.party_id', $user['party_id']], ['r.name', $role], ['p.status', 1]])
+            ->first();
+
+        if (!$result) {
             throw new \Exception('The role that you provided is not assigned to the user.', 401);
         }
-
-        // Decode the permissions.
-        $user['roles'] = array_map(function($permission) {
-            return json_decode($permission);
-        }, $user['roles']);
 
         // Remove the password and return the user.
         unset($user['password']);
