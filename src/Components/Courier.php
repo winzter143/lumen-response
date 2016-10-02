@@ -143,14 +143,14 @@ abstract class Courier
         $pickup = self::pickup($order, $pickup_address);
 
         if (!$pickup) {
-            throw new Exception('No pickup courier available.');
+            throw new \Exception('No pickup courier available.');
         }
 
         // Determine the delivery courier.
         $delivery = self::deliver($order, $delivery_address);
 
         if (!$delivery) {
-            throw new Exception('No delivery courier available.');
+            throw new \Exception('No delivery courier available.');
         }
 
         // Get the warehouse address of the pickup courier.
