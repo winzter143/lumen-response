@@ -25,7 +25,6 @@ class OrganizationsSeeder extends Seeder
             'city' => 'Pasay',
             'state' => 'Manila',
             'postal_code' => '1301',
-            'country_id' => 175
         ],
     ], [
         'type' => 'courier',
@@ -36,7 +35,6 @@ class OrganizationsSeeder extends Seeder
             'city' => 'Makati',
             'state' => 'Manila',
             'postal_code' => '1203',
-            'country_id' => 175
         ],
     ], [
         'type' => 'courier',
@@ -47,7 +45,6 @@ class OrganizationsSeeder extends Seeder
             'city' => 'Quezon City',
             'state' => 'Manila',
             'postal_code' => '1100',
-            'country_id' => 175
         ],
     ], [
         'type' => 'courier',
@@ -58,7 +55,6 @@ class OrganizationsSeeder extends Seeder
             'city' => 'Makati',
             'state' => 'Manila',
             'postal_code' => '1226',
-            'country_id' => 175
         ],
     ], [
         'type' => 'courier',
@@ -69,7 +65,6 @@ class OrganizationsSeeder extends Seeder
             'city' => 'San Juan',
             'state' => 'Manila',
             'postal_code' => '1500',
-            'country_id' => 175
         ],
     ], [
         'type' => 'courier',
@@ -80,7 +75,6 @@ class OrganizationsSeeder extends Seeder
             'city' => 'Cebu',
             'state' => 'Cebu',
             'postal_code' => '6000',
-            'country_id' => 175
         ],
     ]];
 
@@ -113,13 +107,17 @@ class OrganizationsSeeder extends Seeder
                     }
                 }
 
+                // Get the location ID of PH.
+                $location_id = DB::table('core.locations')->where([['type', 'country'], ['code', 'PH']])->value('id');
+
                 // Create the warehouse address.
                 if ($org['type'] == 'courier') {
                     DB::table('core.addresses')->insert(array_merge(
                         $org['warehouse'], [
                             'hash' => Address::hash(array_merge($org['warehouse'], ['party_id' => $party_id])),
                             'type' => 'warehouse',
-                            'party_id' => $party_id
+                            'party_id' => $party_id,
+                            'location_id' => $location_id,
                         ]
                     ));
                 }

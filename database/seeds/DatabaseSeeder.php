@@ -14,6 +14,5 @@ class DatabaseSeeder extends Seeder
         $this->call(RolesSeeder::class);
         $this->call(OrganizationsSeeder::class);
         $this->call(CurrenciesSeeder::class);
-        $this->call(LocationsSeeder::class);
     }
 }

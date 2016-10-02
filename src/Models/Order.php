@@ -175,6 +175,7 @@ class Order extends Model
                 // The order is ready for pick up.
                 $order->forPickup();
             } catch (\Exception $e) {
+                $order_segments = [];
                 if (isset($e->validator)) {
                     // There was a validation error.
                     throw $e;
@@ -217,16 +218,16 @@ class Order extends Model
         }
 
         // Determine the country ID of the pickup address.
-        $order['pickup_address']['country_id'] = array_get($countries, array_get($order, 'pickup_address.country'));
+        $order['pickup_address']['location_id'] = array_get($countries, array_get($order, 'pickup_address.country'));
 
-        if (!$order['pickup_address']['country_id']) {
+        if (!$order['pickup_address']['location_id']) {
             throw new \Exception('The provided country code ' . array_get($order, 'pickup_address.country') . ' for the pickup address is not valid.', 422);
         }
 
         // Determine the country ID of the delivery address.
-        $order['delivery_address']['country_id'] = array_get($countries, array_get($order, 'delivery_address.country'));
+        $order['delivery_address']['location_id'] = array_get($countries, array_get($order, 'delivery_address.country'));
 
-        if (!$order['delivery_address']['country_id']) {
+        if (!$order['delivery_address']['location_id']) {
             throw new \Exception('The provided country code ' .  array_get($order, 'delivery_address.country'). ' for the delivery address is not valid.', 422);
         }
 
@@ -254,7 +255,7 @@ class Order extends Model
 
         // Validate the pickup address.
         $model = new Address;
-        $rules = array_except($model->getRules(), ['party_id', 'country_id']);
+        $rules = array_except($model->getRules(), ['party_id', 'location_id']);
         $model->fill($order['pickup_address'])->validate(null, $rules);
         $model->fill($order['delivery_address'])->validate(null, $rules);
 

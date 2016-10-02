@@ -2,99 +2,24 @@ DROP SCHEMA IF EXISTS core;
 CREATE SCHEMA core;
 
 --
--- Table structure for table countries
+-- Table structure for table `locations`
 --
-CREATE TABLE core.countries
-(
+CREATE TYPE core.location_type AS ENUM ('country', 'state', 'region', 'city', 'district');
+CREATE TABLE core.locations (
   id SERIAL,
+  code VARCHAR(50),
   name VARCHAR(255) NOT NULL,
-  code CHAR(2) NOT NULL,
-  created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (id),
-  CONSTRAINT countries_code_uk UNIQUE (code),
-  CONSTRAINT countries_name_uk UNIQUE (name)
-);
-CREATE INDEX countries_code_fts_idx ON core.countries USING gin(to_tsvector('english', code));
-CREATE INDEX countries_name_fts_idx ON core.countries USING gin(to_tsvector('english', name));
-
---
--- Table structure for table states
---
-CREATE TABLE core.states
-(
-  id SERIAL,
-  country_id INT NOT NULL,
-  name VARCHAR(255) NOT NULL,
-  code VARCHAR(25),
-  created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (id),
-  CONSTRAINT states_country_id_fk FOREIGN KEY (country_id) REFERENCES core.countries (id) ON UPDATE NO ACTION ON DELETE NO ACTION,
-  CONSTRAINT states_country_id_name_uk UNIQUE (country_id, name)
-);
-CREATE INDEX states_name_idx ON core.states (name);
-
---
--- Table structure for table cities
---
-CREATE TABLE core.cities
-(
-  id SERIAL,
-  country_id INT NOT NULL,
-  state_id INT,
-  name VARCHAR(255) NOT NULL,
-  code VARCHAR(25),
-  timezone VARCHAR(50),
-  latitude NUMERIC(7, 4),
-  longitude NUMERIC(7, 4),
-  created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (id),
-  CONSTRAINT cities_country_id_fk FOREIGN KEY (country_id) REFERENCES core.countries (id) ON UPDATE NO ACTION ON DELETE NO ACTION,
-  CONSTRAINT cities_state_id_fk FOREIGN KEY (state_id) REFERENCES core.states (id) ON UPDATE NO ACTION ON DELETE NO ACTION,
-  CONSTRAINT cities_country_id_state_id_name_uk UNIQUE (country_id, state_id, name)
-);
-CREATE INDEX cities_name_idx ON core.cities (name);
-
---
--- Table structure for table communities
---
-CREATE TABLE core.communities
-(
-  id SERIAL,
-  city_id INT NOT NULL,
-  name VARCHAR(255) NOT NULL,
-  code VARCHAR(25),
-  created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (id),
-  CONSTRAINT communities_city_id_fk FOREIGN KEY (city_id) REFERENCES core.cities (id) ON UPDATE NO ACTION ON DELETE NO ACTION,
-  CONSTRAINT communities_city_id_name_uk UNIQUE (city_id, name)
-);
-CREATE INDEX communities_name_idx ON core.communities (name);
-
---
--- Table structure for table locations
---
-CREATE TABLE core.locations
-(
-  id SERIAL,
-  country_id INT NOT NULL,
-  state_id INT,
-  city_id INT,
-  community_id INT,
-  name VARCHAR(255) NOT NULL,
+  type core.location_type NOT NULL,
+  parent_id INT,
   postal_code VARCHAR(50),
-  latitude NUMERIC(7, 4),
-  longitude NUMERIC(7, 4),
-  created_at TIMESTAMP WITH TIME ZONE,
-  PRIMARY KEY (id),
-  CONSTRAINT locations_country_id_fk FOREIGN KEY (country_id) REFERENCES core.countries (id) ON UPDATE NO ACTION ON DELETE NO ACTION,
-  CONSTRAINT locations_state_id_fk FOREIGN KEY (state_id) REFERENCES core.states (id) ON UPDATE NO ACTION ON DELETE NO ACTION,
-  CONSTRAINT locations_city_id_fk FOREIGN KEY (city_id) REFERENCES core.cities (id) ON UPDATE NO ACTION ON DELETE NO ACTION,
-  CONSTRAINT locations_community_id_fk FOREIGN KEY (community_id) REFERENCES core.communities (id) ON UPDATE NO ACTION ON DELETE NO ACTION,
-  CONSTRAINT locations_country_state_city_community_name_postal_code_uk UNIQUE (country_id, state_id, city_id, community_id, name, postal_code)
+  status SMALLINT NOT NULL DEFAULT 1,
+  created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP WITH TIME ZONE,
+  PRIMARY KEY (id)
 );
-CREATE INDEX locations_name_idx ON core.locations (name);
+CREATE INDEX locations_code_fts_idx ON core.locations USING gin(to_tsvector('english', code));
 CREATE INDEX locations_name_fts_idx ON core.locations USING gin(to_tsvector('english', name));
-CREATE INDEX locations_postal_code_idx ON core.locations (postal_code);
+CREATE INDEX locations_type_idx ON core.locations (type);
 
 --
 -- Table structure for table currencies
@@ -241,7 +166,7 @@ CREATE TABLE core.addresses
   city TEXT NOT NULL,
   state TEXT NOT NULL,
   postal_code VARCHAR(50) NOT NULL,
-  country_id INT NOT NULL,
+  location_id INT NOT NULL,
   remarks TEXT,
   hash VARCHAR(32) NOT NULL,
   created_by INT,
@@ -250,7 +175,7 @@ CREATE TABLE core.addresses
   updated_at TIMESTAMP WITH TIME ZONE,
   PRIMARY KEY (id),
   CONSTRAINT addresses_party_id_fk FOREIGN KEY (party_id) REFERENCES core.parties (id) ON DELETE NO ACTION ON UPDATE NO ACTION,
-  CONSTRAINT addresses_country_id_fk FOREIGN KEY (country_id) REFERENCES core.countries (id) ON DELETE NO ACTION ON UPDATE NO ACTION,
+  CONSTRAINT addresses_location_id_fk FOREIGN KEY (location_id) REFERENCES core.locations (id) ON DELETE NO ACTION ON UPDATE NO ACTION,
   CONSTRAINT addresses_hash_uk UNIQUE (hash)
 );
 CREATE INDEX addresses_type_idx ON core.addresses (type);
