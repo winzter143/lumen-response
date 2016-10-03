@@ -195,9 +195,12 @@ CREATE INDEX addresses_postal_code_fts_idx ON core.addresses USING gin(to_tsvect
 CREATE TABLE core.api_keys
 (
   id SERIAL,
+  name VARCHAR(50) NOT NULL,
   party_id INT NOT NULL,
   api_key TEXT NOT NULL,
   secret_key TEXT NOT NULL,
+  token TEXT,
+  token_expires_at TIMESTAMP WITH TIME ZONE,
   status SMALLINT NOT NULL DEFAULT 1,
   created_at TIMESTAMP WITH TIME ZONE NOT NULL,
   expires_at TIMESTAMP WITH TIME ZONE NOT NULL,
