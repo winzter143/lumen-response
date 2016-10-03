@@ -122,7 +122,6 @@ CREATE INDEX relationships_type_idx ON core.relationships (type);
 --
 CREATE TABLE core.roles (
   id SERIAL,
-  parent_id INT,
   name VARCHAR(50) NOT NULL,
   display_name VARCHAR(50) NOT NULL,
   permissions JSONB,

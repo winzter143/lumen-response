@@ -11,25 +11,21 @@ class RolesSeeder extends Seeder
             'name' => 'admin',
             'display_name' => 'Administrator',
             'permissions' => ['create-user', 'edit-user', 'enable-user', 'disable-user'],
-            'parent_id' => null,
         ],
         'finance' => [
             'name' => 'finance',
             'display_name' => 'Finance',
             'permissions' => ['view-transactions', 'view-transaction', 'upload-transactions', 'edit-transaction'],
-            'parent_id' => 1,
         ],
         'oms' => [
             'name' => 'oms',
             'display_name' => 'OMS',
             'permissions' => ['view-orders', 'view-order', 'upload-orders', 'edit-order'],
-            'parent_id' => 1,
         ],
         'client' => [
             'name' => 'client',
             'display_name' => 'Client System',
             'permissions' => ['create-order'],
-            'parent_id' => 1
         ]
     ];
 
@@ -52,7 +48,6 @@ class RolesSeeder extends Seeder
                     'name' => $role['name'],
                     'display_name' => $role['display_name'],
                     'permissions' => json_encode($role['permissions']),
-                    'parent_id' => $role['parent_id'],
                     'created_at' => 'now()'
                 ]);
             }
