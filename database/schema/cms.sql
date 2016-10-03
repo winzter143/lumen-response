@@ -27,24 +27,12 @@ CREATE INDEX assets_caption_content_idx ON cms.assets USING gin(to_tsvector('eng
 CREATE TABLE cms.pages
 (
   id SERIAL,
+  parent_id INT,
   slug VARCHAR(255) NOT NULL,
   name VARCHAR(255) NOT NULL,
+  content JSONB,
   created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (id),
   CONSTRAINT pages_slug_uk UNIQUE (slug),
   CONSTRAINT pages_name_uk UNIQUE (name)
-);
-
-CREATE TABLE cms.page_assets
-(
-  id SERIAL,
-  page_id INT NOT NULL,
-  asset_id INT NOT NULL,
-  type cms.page_assets_type NOT NULL,
-  sort_order SMALLINT,
-  created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (id),
-  CONSTRAINT page_assets_page_id_fk FOREIGN KEY (page_id) REFERENCES cms.pages (id) ON DELETE NO ACTION ON UPDATE NO ACTION,
-  CONSTRAINT page_assets_asset_id_fk FOREIGN KEY (asset_id) REFERENCES cms.assets (id) ON DELETE NO ACTION ON UPDATE NO ACTION,
-  CONSTRAINT page_assets_page_id_asset_id_uk UNIQUE (page_id, asset_id)
 );
