@@ -76,6 +76,12 @@ class OrganizationsSeeder extends Seeder
             'state' => 'Cebu',
             'postal_code' => '6000',
         ],
+    ], [
+        'type' => 'merchant',
+        'name' => 'CMO',
+    ], [
+        'type' => 'merchant',
+        'name' => 'Shipping Cart',
     ]];
 
     /**
@@ -120,6 +126,16 @@ class OrganizationsSeeder extends Seeder
                             'location_id' => $location_id,
                         ]
                     ));
+                }
+
+                // Create the roles.
+                if ($org['type'] == 'merchant') {
+                    // Get the client role.
+                    $role_id = DB::table('core.roles')->where('name', 'client')->value('id');
+                    DB::table('core.party_roles')->insert([
+                        'party_id' => $party_id,
+                        'role_id' => $role_id
+                    ]);
                 }
             }
 
