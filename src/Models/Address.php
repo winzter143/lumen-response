@@ -85,6 +85,8 @@ class Address extends Model
         $address = self::where(['party_id' => $party_id, 'hash' => $attributes['hash']])->first();
 
         if ($address) {
+            // Update the fields that are not included in the address hash.
+            $address->update(['title' => $attributes['title'], 'fax_number' => $attributes['fax_number'], 'remarks' => $attributes['remarks']]);
             return $address;
         } else {
             return self::create($attributes);
@@ -96,7 +98,7 @@ class Address extends Model
      */
     public static function hash($address)
     {
-        return md5(trim(array_get($address, 'party_id')) . '|' . trim(array_get($address, 'type')) . '|' . trim(array_get($address, 'company')) . '|' . trim(array_get($address, 'name')) . '|' . trim(array_get($address, 'line_1')) . '|' . trim(array_get($address, 'line_2')) . '|' . trim(array_get($address, 'city')) . '|' . trim(array_get($address, 'state')) . '|' . trim(array_get($address, 'postal_code')) . '|' . trim(array_get($address, 'country_id')));
+        return md5(trim(array_get($address, 'party_id')) . '|' . trim(array_get($address, 'type')) . '|' . trim(array_get($address, 'name')) . '|' . trim(array_get($address, 'email')) . '|' . trim(array_get($address, 'phone_number')) . '|' . trim(array_get($address, 'mobile_number')) . '|' . trim(array_get($address, 'company')) . '|' . trim(array_get($address, 'name')) . '|' . trim(array_get($address, 'line_1')) . '|' . trim(array_get($address, 'line_2')) . '|' . trim(array_get($address, 'city')) . '|' . trim(array_get($address, 'state')) . '|' . trim(array_get($address, 'postal_code')) . '|' . trim(array_get($address, 'country_id')));
     }
 
     /**
