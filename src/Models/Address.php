@@ -16,7 +16,7 @@ class Address extends Model
      * The attributes that are mass assignable.
      * @var array
      */
-    protected $fillable = ['party_id', 'type', 'name', 'title', 'email', 'phone_number', 'mobile_number', 'fax_number', 'company', 'line_1', 'line_2', 'city', 'state', 'postal_code', 'location_id', 'remarks', 'created_by', 'hash'];
+    protected $fillable = ['party_id', 'type', 'name', 'title', 'email', 'phone_number', 'mobile_number', 'fax_number', 'company', 'line_1', 'line_2', 'city', 'state', 'postal_code', 'country_id', 'remarks', 'created_by', 'hash'];
 
     /**
      * Returns the model validation rules.
@@ -38,7 +38,7 @@ class Address extends Model
             'city' => 'string|required',
             'state' => 'string|required',
             'postal_code' => 'string|required|max:50',
-            'location_id' => 'integer|required|exists:pgsql.core.locations,id',
+            'country_id' => 'integer|required|exists:pgsql.core.locations,id',
             'remarks' => 'string|nullable',
             'created_by' => 'integer|nullable|exists:pgsql.core.parties,id',
             'hash' => 'string|required|min:32|max:32'
@@ -51,9 +51,9 @@ class Address extends Model
     public static function store($party_id, $type, $name, $line_1, $line_2 = null, $city, $state, $postal_code, $country_code, $remarks = null, $created_by = null, $title = null, $email = null, $phone_number = null, $mobile_number = null, $fax_number = null, $company = null)
     {
         // Look for the country ID.
-        $location_id = DB::table('core.locations')->where([['type', 'country'], ['code', $country_code]])->value('id');
+        $country_id = DB::table('core.locations')->where([['type', 'country'], ['code', $country_code]])->value('id');
 
-        if (!$location_id) {
+        if (!$country_id) {
             throw new \Exception("The provided country code for the {$type} address is not valid.", 422);
         }
 
@@ -73,7 +73,7 @@ class Address extends Model
             'city' => $city,
             'state' => $state,
             'postal_code' => $postal_code,
-            'location_id' => $location_id,
+            'country_id' => $country_id,
             'remarks' => $remarks,
             'created_by' => $created_by
         ];
@@ -96,7 +96,7 @@ class Address extends Model
      */
     public static function hash($address)
     {
-        return md5(trim(array_get($address, 'party_id')) . '|' . trim(array_get($address, 'type')) . '|' . trim(array_get($address, 'company')) . '|' . trim(array_get($address, 'name')) . '|' . trim(array_get($address, 'line_1')) . '|' . trim(array_get($address, 'line_2')) . '|' . trim(array_get($address, 'city')) . '|' . trim(array_get($address, 'state')) . '|' . trim(array_get($address, 'postal_code')) . '|' . trim(array_get($address, 'location_id')));
+        return md5(trim(array_get($address, 'party_id')) . '|' . trim(array_get($address, 'type')) . '|' . trim(array_get($address, 'company')) . '|' . trim(array_get($address, 'name')) . '|' . trim(array_get($address, 'line_1')) . '|' . trim(array_get($address, 'line_2')) . '|' . trim(array_get($address, 'city')) . '|' . trim(array_get($address, 'state')) . '|' . trim(array_get($address, 'postal_code')) . '|' . trim(array_get($address, 'country_id')));
     }
 
     /**

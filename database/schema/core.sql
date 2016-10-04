@@ -165,7 +165,7 @@ CREATE TABLE core.addresses
   city TEXT NOT NULL,
   state TEXT NOT NULL,
   postal_code VARCHAR(50) NOT NULL,
-  location_id INT NOT NULL,
+  country_id INT NOT NULL,
   remarks TEXT,
   hash VARCHAR(32) NOT NULL,
   created_by INT,
@@ -174,7 +174,7 @@ CREATE TABLE core.addresses
   updated_at TIMESTAMP WITH TIME ZONE,
   PRIMARY KEY (id),
   CONSTRAINT addresses_party_id_fk FOREIGN KEY (party_id) REFERENCES core.parties (id) ON DELETE NO ACTION ON UPDATE NO ACTION,
-  CONSTRAINT addresses_location_id_fk FOREIGN KEY (location_id) REFERENCES core.locations (id) ON DELETE NO ACTION ON UPDATE NO ACTION,
+  CONSTRAINT addresses_country_id_fk FOREIGN KEY (country_id) REFERENCES core.locations (id) ON DELETE NO ACTION ON UPDATE NO ACTION,
   CONSTRAINT addresses_hash_uk UNIQUE (hash)
 );
 CREATE INDEX addresses_type_idx ON core.addresses (type);
