@@ -16,7 +16,7 @@ class Claim extends Model
      * The attributes that are mass assignable.
      * @var array
      */
-    protected $fillable = ['order_id', 'status', 'reason', 'amount', 'shipping_fee_flag', 'insurance_fee_flag', 'service_fee_flag', 'documentary_proof_url', 'remarks', 'created_at', 'created_by', 'updated_at', 'updated_by'];
+    protected $fillable = ['order_id', 'status', 'reason', 'amount', 'shipping_fee_flag', 'insurance_fee_flag', 'transaction_fee_flag', 'documentary_proof_url', 'remarks', 'created_at', 'created_by', 'updated_at', 'updated_by'];
 
     /**
      * The table's primary key.
@@ -36,7 +36,7 @@ class Claim extends Model
             'amount' => 'numeric|required|min:0|max:999999999999.99',
             'shipping_fee_flag' => 'integer|in:0,1',
             'insurance_fee_flag' => 'integer|in:0,1',
-            'service_fee_flag' => 'integer|in:0,1',
+            'transaction_fee_flag' => 'integer|in:0,1',
             'documentary_proof_url' => 'url|nullable',
             'remarks' => 'string|nullable'
         ];
@@ -47,7 +47,7 @@ class Claim extends Model
     /**
      * Creates a new order.
      */
-    public static function store($order_id, $amount, $reason, $documentary_proof_url = null, $shipping_fee_flag = 0, $insurance_fee_flag = 0, $service_fee_flag = 0, $remarks = null, $status = 'pending')
+    public static function store($order_id, $amount, $reason, $documentary_proof_url = null, $shipping_fee_flag = 0, $insurance_fee_flag = 0, $transaction_fee_flag = 0, $remarks = null, $status = 'pending')
     {
         try {
             // Start the transaction.
@@ -97,7 +97,7 @@ class Claim extends Model
                 'documentary_proof_url' => $documentary_proof_url,
                 'shipping_fee_flag' => $shipping_fee_flag,
                 'insurance_fee_flag' => $insurance_fee_flag,
-                'service_fee_flag' => $service_fee_flag,
+                'transaction_fee_flag' => $transaction_fee_flag,
                 'remarks' => $remarks,
                 'status' => $status,
             ];

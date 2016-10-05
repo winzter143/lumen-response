@@ -17,7 +17,7 @@ class Order extends Model
      * The attributes that are mass assignable.
      * @var array
      */
-    protected $fillable = ['id', 'org_party_id', 'currency_id', 'reference_id', 'pickup_address_id', 'delivery_address_id', 'tracking_number', 'payment_method', 'payment_provider', 'status', 'buyer_name', 'email', 'contact_number', 'subtotal', 'shipping', 'tax', 'fee', 'grand_total', 'metadata', 'ip_address', 'preferred_pickup_time', 'preferred_delivery_time', 'insurance', 'insurance_fee', 'service_fee', 'shipping_fee', 'pickup_date', 'last_status_update', 'active_segment_id', 'total_collected'];
+    protected $fillable = ['id', 'org_party_id', 'currency_id', 'reference_id', 'pickup_address_id', 'delivery_address_id', 'tracking_number', 'payment_method', 'payment_provider', 'status', 'buyer_name', 'email', 'contact_number', 'subtotal', 'shipping', 'tax', 'fee', 'grand_total', 'metadata', 'ip_address', 'preferred_pickup_time', 'preferred_delivery_time', 'insurance', 'insurance_fee', 'transaction_fee', 'shipping_fee', 'pickup_date', 'status_updated_at', 'active_segment_id', 'total_collected'];
 
     /**
      * Returns the model validation rules.
@@ -357,7 +357,7 @@ class Order extends Model
 
             // Update the order status.
             $this->status = $status;
-            $this->last_status_update = DB::raw('now()');
+            $this->status_updated_at = DB::raw('now()');
             $result = $this->save();
 
             // Create an order event.
@@ -520,9 +520,9 @@ class Order extends Model
     /**
      * Claims an order.
      */
-    public function claim($amount, $reason, $documentary_proof_url = null, $shipping_fee_flag = 0, $insurance_fee_flag = 0, $service_fee_flag = 0, $status = 'pending')
+    public function claim($amount, $reason, $documentary_proof_url = null, $shipping_fee_flag = 0, $insurance_fee_flag = 0, $transaction_fee_flag = 0, $status = 'pending')
     {
-        return Claim::store($this->id, $amount, $reason, $documentary_proof_url, $shipping_fee_flag, $insurance_fee_flag, $service_fee_flag, $status);
+        return Claim::store($this->id, $amount, $reason, $documentary_proof_url, $shipping_fee_flag, $insurance_fee_flag, $transaction_fee_flag, $status);
     }
 
     /**
@@ -631,10 +631,10 @@ class Order extends Model
 
         // Determine the service fee.
         if ($payment_method == 'cod') {
-            $fees['service_fee'] = ($contract['service_fee']['type'] == 'percent') ? round($contract['service_fee']['value'] * $grand_total, 2) : $contract['service_fee']['value'];
-            $fees['service_fee'] = max($fees['service_fee'], $contract['service_fee']['max']);
+            $fees['transaction_fee'] = ($contract['transaction_fee']['type'] == 'percent') ? round($contract['transaction_fee']['value'] * $grand_total, 2) : $contract['transaction_fee']['value'];
+            $fees['transaction_fee'] = max($fees['transaction_fee'], $contract['transaction_fee']['max']);
         } else {
-            $fees['service_fee'] = 0;
+            $fees['transaction_fee'] = 0;
         }
 
         return $fees;
