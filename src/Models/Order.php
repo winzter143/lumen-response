@@ -38,9 +38,10 @@ class Order extends Model
             'email' => 'string|email|max:50|required_without:contact_number',
             'contact_number' => 'string|max:50|required_without:email',
             'subtotal' => 'numeric|required|min:0|max:999999999999.99',
-            'shipping' => 'numeric|required|min:0|max:999999999999.99',
-            'tax' => 'numeric|required|min:0|max:999999999999.99',
-            'fee' => 'numeric|required|min:0|max:999999999999.99',
+            'shipping' => 'numeric|nullable|min:0|max:999999999999.99',
+            'tax' => 'numeric|nullable|min:0|max:999999999999.99',
+            'fee' => 'numeric|nullable|min:0|max:999999999999.99',
+            'insurance' => 'numeric|nullable|min:0|max:999999999999.99',
             'grand_total' => 'numeric|required|min:0|max:999999999999.99',
             'metadata' => 'json|nullable',
             'ip_address' => 'ip|nullable',
@@ -570,7 +571,7 @@ class Order extends Model
     public static function getTotalBreakdown($items, $grand_total)
     {
         // Set the default values.
-        $breakdown = ['subtotal' => 0, 'shipping' => 0, 'tax' => 0, 'fee' => 0, 'insurance' => 0, 'grand_total' => 0];
+        $breakdown = ['shipping' => null, 'tax' => null, 'fee' => null, 'insurance' => null, 'subtotal' => 0, 'grand_total' => 0];
 
         if (is_array($items) && $items) {
             // Loop through each item and compute for the total.
