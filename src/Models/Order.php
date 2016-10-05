@@ -17,7 +17,7 @@ class Order extends Model
      * The attributes that are mass assignable.
      * @var array
      */
-    protected $fillable = ['id', 'org_party_id', 'currency_id', 'reference_id', 'pickup_address_id', 'delivery_address_id', 'tracking_number', 'payment_method', 'status', 'buyer_name', 'email', 'contact_number', 'subtotal', 'shipping', 'tax', 'fee', 'grand_total', 'metadata', 'ip_address', 'preferred_pickup_time', 'preferred_delivery_time', 'insurance', 'insurance_fee', 'service_fee', 'shipping_fee', 'pickup_date', 'last_status_update', 'active_segment_id', 'total_collected'];
+    protected $fillable = ['id', 'org_party_id', 'currency_id', 'reference_id', 'pickup_address_id', 'delivery_address_id', 'tracking_number', 'payment_method', 'payment_provider', 'status', 'buyer_name', 'email', 'contact_number', 'subtotal', 'shipping', 'tax', 'fee', 'grand_total', 'metadata', 'ip_address', 'preferred_pickup_time', 'preferred_delivery_time', 'insurance', 'insurance_fee', 'service_fee', 'shipping_fee', 'pickup_date', 'last_status_update', 'active_segment_id', 'total_collected'];
 
     /**
      * Returns the model validation rules.
@@ -32,6 +32,7 @@ class Order extends Model
             'delivery_address_id' => 'integer|required|exists:pgsql.core.addresses,id',
             'tracking_number' => 'string|max:15',
             'payment_method' => 'string|required|in:' . implode(',', array_keys(config('settings.payment_methods'))),
+            'payment_provider' => 'string|required|in:' . implode(',', array_keys(config('settings.payment_providers'))),
             'status' => 'string|in:' . implode(',', array_keys(config('settings.order_statuses'))),
             'buyer_name' => 'string|required|max:100',
             'email' => 'string|email|max:50|required_without:contact_number',
@@ -67,7 +68,7 @@ class Order extends Model
     /**
      * Creates a new order.
      */
-    public static function store($org_party_id, $pickup_address, $delivery_address, $buyer_name, $email, $contact_number, $grand_total, $total_collected = 0, $payment_method = null, $items = [], $currency = 'PHP', $reference_id = null, $metadata = null, $preferred_pickup_time = null, $preferred_delivery_time = null, $ip_address = null)
+    public static function store($org_party_id, $pickup_address, $delivery_address, $buyer_name, $email, $contact_number, $grand_total, $payment_method, $payment_provider, $reference_id, $total_collected = 0, $items = [], $currency = 'PHP', $metadata = null, $preferred_pickup_time = null, $preferred_delivery_time = null, $ip_address = null)
     {
         try {
             // Start the transaction.
@@ -118,6 +119,7 @@ class Order extends Model
                 'contact_number' => $contact_number,
                 'grand_total' => $grand_total,
                 'payment_method' => $payment_method,
+                'payment_provider' => $payment_provider,
                 'reference_id' => $reference_id,
                 'metadata' => $metadata,
                 'preferred_pickup_time' => $preferred_pickup_time,
