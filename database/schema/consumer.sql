@@ -10,7 +10,8 @@ CREATE SEQUENCE consumer.lbc_tracking_number_seq START WITH 71001372089163;
 -- Table structure for table orders
 --
 CREATE TYPE consumer.order_status AS ENUM ('pending', 'for_pickup', 'picked_up', 'failed_pickup', 'in_transit', 'claimed', 'out_for_delivery', 'delivered', 'failed_delivery', 'return_in_transit', 'returned', 'failed_return');
-CREATE TYPE consumer.payment_method AS ENUM ('credit_card', 'bank_deposit', 'mobile', 'cod');
+CREATE TYPE consumer.payment_method AS ENUM ('credit_card', 'cod', 'otc', 'debit_card');
+CREATE TYPE consumer.payment_provider AS ENUM('asiapay', 'dragonpay', 'lbc', 'lbcx');
 CREATE TABLE consumer.orders
 (
   id SERIAL,
@@ -23,6 +24,7 @@ CREATE TABLE consumer.orders
   active_segment_id INT,
   tracking_number VARCHAR(15) NOT NULL,
   payment_method consumer.payment_method,
+  payment_provider consumer.payment_provider,
   status consumer.order_status NOT NULL DEFAULT 'pending',
   buyer_name VARCHAR(100) NOT NULL,
   email VARCHAR(50),
@@ -36,20 +38,20 @@ CREATE TABLE consumer.orders
   total_collected NUMERIC(14, 2) NOT NULL DEFAULT 0,
   shipping_fee NUMERIC(14,2) NOT NULL,
   insurance_fee NUMERIC(14,2) NOT NULL,
-  service_fee NUMERIC(14,2) NOT NULL,
+  transaction_fee NUMERIC(14,2) NOT NULL,
   metadata JSONB,
   parcel JSONB,
   ip_address VARCHAR(15),
   preferred_pickup_time VARCHAR(100),
   preferred_delivery_time VARCHAR(100),
-  flagged SMALLINT NOT NULL DEFAULT 0,
-  created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  updated_by INT,
-  updated_at TIMESTAMP WITH TIME ZONE,
   delivery_date TIMESTAMP WITH TIME ZONE,
   pickup_date TIMESTAMP WITH TIME ZONE,
   pickup_attempts SMALLINT NOT NULL DEFAULT 0,
   last_status_update TIMESTAMP WITH TIME ZONE,
+  flagged SMALLINT NOT NULL DEFAULT 0,
+  created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_by INT,
+  updated_at TIMESTAMP WITH TIME ZONE,
   PRIMARY KEY (id),
   CONSTRAINT orders_org_party_id_fk FOREIGN KEY (org_party_id) REFERENCES core.organizations (party_id) ON DELETE NO ACTION ON UPDATE NO ACTION,
   CONSTRAINT orders_currency_id FOREIGN KEY (currency_id) REFERENCES core.currencies (id) ON DELETE NO ACTION ON UPDATE NO ACTION,
@@ -179,12 +181,12 @@ CREATE TABLE consumer.claims
 (
   order_id INT NOT NULL,
   status consumer.claim_status NOT NULL DEFAULT 'pending',
-  reason TEXT NOT NULL,
   amount NUMERIC(14, 2) NOT NULL,
   shipping_fee_flag SMALLINT NOT NULL DEFAULT 0,
   insurance_fee_flag SMALLINT NOT NULL DEFAULT 0,
   service_fee_flag SMALLINT NOT NULL DEFAULT 0,
   documentary_proof_url TEXT,
+  reason TEXT NOT NULL,
   remarks TEXT,
   created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
   created_by INT,
