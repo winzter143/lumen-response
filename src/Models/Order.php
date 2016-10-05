@@ -130,11 +130,18 @@ class Order extends Model
 
             // Create the order items.
             if (is_array($items) && $items) {
+                // Check if a product item is present.
+                if (!in_array('product', array_values(array_column($items, 'type')))) {
+                    throw new \Exception('At least one order item of type "product" is required.', 422);
+                }
+
+                // Create the order items.
                 foreach ($items as $item) {
                     $order_items[] = $order->addItem(array_get($item, 'type'), array_get($item, 'description'), array_get($item, 'amount'), array_get($item, 'quantity'), array_get($item, 'metadata'));
                 }
             } else {
-                $order_items = [];
+                // There are no items.
+                throw new \Exception('At least one order item of type "product" is required.', 422);
             }
 
             // Create a charge if the COD flag is set.
