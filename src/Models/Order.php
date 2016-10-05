@@ -17,7 +17,7 @@ class Order extends Model
      * The attributes that are mass assignable.
      * @var array
      */
-    protected $fillable = ['id', 'org_party_id', 'currency_id', 'reference_id', 'pickup_address_id', 'delivery_address_id', 'tracking_number', 'payment_method', 'payment_provider', 'status', 'buyer_name', 'email', 'contact_number', 'subtotal', 'shipping', 'tax', 'fee', 'grand_total', 'metadata', 'ip_address', 'preferred_pickup_time', 'preferred_delivery_time', 'insurance', 'insurance_fee', 'transaction_fee', 'shipping_fee', 'pickup_date', 'status_updated_at', 'active_segment_id', 'total_collected'];
+    protected $fillable = ['id', 'party_id', 'currency_id', 'reference_id', 'pickup_address_id', 'delivery_address_id', 'tracking_number', 'payment_method', 'payment_provider', 'status', 'buyer_name', 'email', 'contact_number', 'subtotal', 'shipping', 'tax', 'fee', 'grand_total', 'metadata', 'ip_address', 'preferred_pickup_time', 'preferred_delivery_time', 'insurance', 'insurance_fee', 'transaction_fee', 'shipping_fee', 'pickup_date', 'status_updated_at', 'active_segment_id', 'total_collected'];
 
     /**
      * Returns the model validation rules.
@@ -26,7 +26,7 @@ class Order extends Model
     {
         // Set the validation rules.
         $rules = [
-            'org_party_id' => 'integer|required|exists:pgsql.core.organizations,party_id',
+            'party_id' => 'integer|required|exists:pgsql.core.organizations,party_id',
             'currency_id' => 'integer|required|exists:pgsql.core.currencies,id',
             'pickup_address_id' => 'integer|required|exists:pgsql.core.addresses,id',
             'delivery_address_id' => 'integer|required|exists:pgsql.core.addresses,id',
@@ -52,7 +52,7 @@ class Order extends Model
 
         // Add the reference ID check if it's a new record.
         if (!$this->exists) {
-            $rules['reference_id'] = 'string|required|max:100|unique:pgsql.consumer.orders,reference_id,NULL,id,org_party_id,' . $this->org_party_id;
+            $rules['reference_id'] = 'string|required|max:100|unique:pgsql.consumer.orders,reference_id,NULL,id,party_id,' . $this->party_id;
         }
 
         return $rules;
@@ -69,7 +69,7 @@ class Order extends Model
     /**
      * Creates a new order.
      */
-    public static function store($org_party_id, $pickup_address, $delivery_address, $buyer_name, $email, $contact_number, $grand_total, $payment_method, $payment_provider, $reference_id, $total_collected = 0, $items = [], $currency = 'PHP', $metadata = null, $preferred_pickup_time = null, $preferred_delivery_time = null, $ip_address = null)
+    public static function store($party_id, $pickup_address, $delivery_address, $buyer_name, $email, $contact_number, $grand_total, $payment_method, $payment_provider, $reference_id, $total_collected = 0, $items = [], $currency = 'PHP', $metadata = null, $preferred_pickup_time = null, $preferred_delivery_time = null, $ip_address = null)
     {
         try {
             // Start the transaction.
@@ -83,16 +83,16 @@ class Order extends Model
             }
 
             // Create the source address.
-            $pickup_address = Address::store($org_party_id, 'pickup', array_get($pickup_address, 'name'), array_get($pickup_address, 'line_1'), array_get($pickup_address, 'line_2'), array_get($pickup_address, 'city'), array_get($pickup_address, 'state'), array_get($pickup_address, 'postal_code'), array_get($pickup_address, 'country'), array_get($pickup_address, 'remarks'), array_get($pickup_address, 'created_by'), array_get($pickup_address, 'title'), array_get($pickup_address, 'email'), array_get($pickup_address, 'phone_number'), array_get($pickup_address, 'mobile_number'), array_get($pickup_address, 'fax_number'), array_get($pickup_address, 'company'));
+            $pickup_address = Address::store($party_id, 'pickup', array_get($pickup_address, 'name'), array_get($pickup_address, 'line_1'), array_get($pickup_address, 'line_2'), array_get($pickup_address, 'city'), array_get($pickup_address, 'state'), array_get($pickup_address, 'postal_code'), array_get($pickup_address, 'country'), array_get($pickup_address, 'remarks'), array_get($pickup_address, 'created_by'), array_get($pickup_address, 'title'), array_get($pickup_address, 'email'), array_get($pickup_address, 'phone_number'), array_get($pickup_address, 'mobile_number'), array_get($pickup_address, 'fax_number'), array_get($pickup_address, 'company'));
 
             // Create the destination address.
-            $delivery_address = Address::store($org_party_id, 'delivery', array_get($delivery_address, 'name'), array_get($delivery_address, 'line_1'), array_get($delivery_address, 'line_2'), array_get($delivery_address, 'city'), array_get($delivery_address, 'state'), array_get($delivery_address, 'postal_code'), array_get($delivery_address, 'country'), array_get($delivery_address, 'remarks'), array_get($delivery_address, 'created_by'), array_get($delivery_address, 'title'), array_get($delivery_address, 'email'), array_get($delivery_address, 'phone_number'), array_get($delivery_address, 'mobile_number'), array_get($delivery_address, 'fax_number'), array_get($delivery_address, 'company'));
+            $delivery_address = Address::store($party_id, 'delivery', array_get($delivery_address, 'name'), array_get($delivery_address, 'line_1'), array_get($delivery_address, 'line_2'), array_get($delivery_address, 'city'), array_get($delivery_address, 'state'), array_get($delivery_address, 'postal_code'), array_get($delivery_address, 'country'), array_get($delivery_address, 'remarks'), array_get($delivery_address, 'created_by'), array_get($delivery_address, 'title'), array_get($delivery_address, 'email'), array_get($delivery_address, 'phone_number'), array_get($delivery_address, 'mobile_number'), array_get($delivery_address, 'fax_number'), array_get($delivery_address, 'company'));
 
             // Round off the grand total to two decimal places.
             $grand_total = round($grand_total, 2);
 
             // Compute for the fees.
-            $fees = self::getFees($org_party_id, $grand_total, $delivery_address, $payment_method);
+            $fees = self::getFees($party_id, $grand_total, $delivery_address, $payment_method);
 
             // Get the breakdown of the total amount.
             // This will also check if grand total is the same as the item total.
@@ -111,7 +111,7 @@ class Order extends Model
                 'tracking_number' => $tracking_number,
                 'pickup_address_id' => $pickup_address->id,
                 'delivery_address_id' => $delivery_address->id,
-                'org_party_id' => $org_party_id,
+                'party_id' => $party_id,
                 'currency_id' => $currency_id,
                 'pickup_address' => $pickup_address,
                 'delivery' => $delivery_address,
@@ -215,10 +215,10 @@ class Order extends Model
     /**
      * Validates the the shipping orders and assigns a tracking number for asynchronous processing.
      */
-    public static function prepare($org_party_id, $order, $currencies, $countries)
+    public static function prepare($party_id, $order, $currencies, $countries)
     {
         // Add the organization ID to the order.
-        $order['org_party_id'] = $org_party_id;
+        $order['party_id'] = $party_id;
 
         // Determine the currency ID.
         $order['currency_id'] = array_get($currencies, array_get($order, 'currency', config('settings.defaults.currency')));
@@ -257,7 +257,7 @@ class Order extends Model
 
         // Validate the order.
         $model = new self($order);
-        $rules = array_except($model->getRules(), ['org_party_id', 'currency_id', 'pickup_address_id', 'delivery_address_id']);
+        $rules = array_except($model->getRules(), ['party_id', 'currency_id', 'pickup_address_id', 'delivery_address_id']);
         $model->validate(null, $rules);
 
         // Decode the metadata.
@@ -535,7 +535,7 @@ class Order extends Model
         $default = config('settings.defaults.contract');
 
         // Get the client contract.
-        $contract = Party::getMetaData($this->org_party_id, 'contract');
+        $contract = Party::getMetaData($this->party_id, 'contract');
 
         // Set the default values.
         $contract = is_array($contract) ? array_merge($default, $contract) : $default;
@@ -613,13 +613,13 @@ class Order extends Model
     /**
      * Computes for the client fees.
      */
-    public static function getFees($org_party_id, $grand_total, $delivery_address, $payment_method)
+    public static function getFees($party_id, $grand_total, $delivery_address, $payment_method)
     {
         // Get the default contract.
         $default = config('settings.defaults.contract');
 
         // Fetch the client contract.
-        $contract = Party::getMetaData($org_party_id, 'contract');
+        $contract = Party::getMetaData($party_id, 'contract');
         $contract = __is_array_associative($contract) ? array_merge($default, $contract) : $default;
 
         // Determine the shipping fee.

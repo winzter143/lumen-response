@@ -55,7 +55,7 @@ class Claim extends Model
 
             // Perform additional checks.
             // Fetch the order and merchant contract.
-            $order = DB::table('consumer.orders as o')->select(['o.delivery_date', 'o.status', 'o.grand_total', 'p.metadata'])->join('core.parties as p', 'p.id', '=', 'o.org_party_id')->where([['o.id', $order_id], ['p.status', 1]])->first();
+            $order = DB::table('consumer.orders as o')->select(['o.delivery_date', 'o.status', 'o.grand_total', 'p.metadata'])->join('core.parties as p', 'p.id', '=', 'o.party_id')->where([['o.id', $order_id], ['p.status', 1]])->first();
 
             if (!$order) {
                 throw new \Exception('The order does not exist.', 422);

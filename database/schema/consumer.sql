@@ -15,7 +15,7 @@ CREATE TYPE consumer.payment_provider AS ENUM('asiapay', 'dragonpay', 'lbc', 'lb
 CREATE TABLE consumer.orders
 (
   id SERIAL,
-  org_party_id INT NOT NULL,
+  party_id INT NOT NULL,
   currency_id INT NOT NULL,
   reference_id VARCHAR(100) NOT NULL,
   pickup_address_id INT NOT NULL,
@@ -53,13 +53,13 @@ CREATE TABLE consumer.orders
   updated_by INT,
   updated_at TIMESTAMP WITH TIME ZONE,
   PRIMARY KEY (id),
-  CONSTRAINT orders_org_party_id_fk FOREIGN KEY (org_party_id) REFERENCES core.organizations (party_id) ON DELETE NO ACTION ON UPDATE NO ACTION,
+  CONSTRAINT orders_party_id_fk FOREIGN KEY (party_id) REFERENCES core.parties (id) ON DELETE NO ACTION ON UPDATE NO ACTION,
   CONSTRAINT orders_currency_id FOREIGN KEY (currency_id) REFERENCES core.currencies (id) ON DELETE NO ACTION ON UPDATE NO ACTION,
   CONSTRAINT orders_pickup_address_id FOREIGN KEY (pickup_address_id) REFERENCES core.addresses (id) ON DELETE NO ACTION ON UPDATE NO ACTION,
   CONSTRAINT orders_delivery_address_id FOREIGN KEY (delivery_address_id) REFERENCES core.addresses (id) ON DELETE NO ACTION ON UPDATE NO ACTION,
   CONSTRAINT orders_return_address_id FOREIGN KEY (return_address_id) REFERENCES core.addresses (id) ON DELETE NO ACTION ON UPDATE NO ACTION,
   CONSTRAINT orders_tracking_number_uk UNIQUE (tracking_number),
-  CONSTRAINT orders_org_party_reference_id_uk UNIQUE (org_party_id, reference_id)
+  CONSTRAINT orders_party_id_reference_id_uk UNIQUE (party_id, reference_id)
 );
 CREATE INDEX orders_buyer_name_fts_idx ON consumer.orders USING gin(to_tsvector('english', buyer_name));
 CREATE INDEX orders_email_fts_idx ON consumer.orders USING gin(to_tsvector('english', email));
