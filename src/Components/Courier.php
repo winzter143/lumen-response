@@ -172,9 +172,9 @@ abstract class Courier
 
             // TODO: patch these later when we integrate with 3rd party couriers.
             'shipping_type' => config('settings.defaults.shipping_type'),
-            'currency' => config('settings.defaults.currency'),
-            'currency_id' => config('settings.defaults.currency_id'),
-            'amount' => 0,
+            'currency' => null,
+            'currency_id' => null,
+            'amount' => null,
         ];
 
         // Create the delivery route.
@@ -193,9 +193,9 @@ abstract class Courier
 
             // TODO: patch these later when we integrate with 3rd party couriers.
             'shipping_type' => config('settings.defaults.shipping_type'),
-            'currency' => config('settings.defaults.currency'),
-            'currency_id' => config('settings.defaults.currency_id'),
-            'amount' => 0,
+            'currency' => null,
+            'currency_id' => null,
+            'amount' => null,
         ];
 
         // Return the routes and let the caller create the segments.

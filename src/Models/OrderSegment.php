@@ -37,8 +37,8 @@ class OrderSegment extends Model
             'order_id' => 'integer|required|exists:pgsql.consumer.orders,id',
             'courier_party_id' => 'integer|required|exists:pgsql.core.organizations,party_id',
             'shipping_type' => 'string|required|in:land,sea,air',
-            'currency_id' => 'integer|required|exists:pgsql.core.currencies,id',
-            'amount' => 'numeric|required|min:0|max:999999999999.99',
+            'currency_id' => 'integer|nullable|exists:pgsql.core.currencies,id',
+            'amount' => 'numeric|nullable|min:0|max:999999999999.99',
             'reference_id' => 'string|required|max:100',
             'pickup_address_id' => 'integer|required|exists:pgsql.core.addresses,id',
             'delivery_address_id' => 'integer|required|exists:pgsql.core.addresses,id',
@@ -51,7 +51,7 @@ class OrderSegment extends Model
     /**
      * Creates a new segment.
      */
-    public static function store($order_id, $courier_party_id, $type, $shipping_type, $currency_id, $amount, $reference_id, $pickup_address_id, $delivery_address_id, $start_date, $end_date, $flagged, $status = 'pending', $barcode_format_1d = 'code_128', $barcode_format_2d = 'qr')
+    public static function store($order_id, $courier_party_id, $type, $shipping_type, $reference_id, $pickup_address_id, $delivery_address_id, $start_date = null, $end_date = null, $currency_id = null, $amount = null, $flagged = 0, $status = 'pending', $barcode_format_1d = 'code_128', $barcode_format_2d = 'qr')
     {
         try {
             // Build the attribute list.

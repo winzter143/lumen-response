@@ -168,7 +168,7 @@ class Order extends Model
                 // Create the order segments.
                 $order_segments = [];
                 foreach ($routes as $k => $route) {
-                    $order_segments[$k] = $order->addSegment($route['courier_party_id'], $route['type'], $route['shipping_type'], $route['currency_id'], $route['amount'], $route['reference_id'], $route['pickup_address_id'], $route['delivery_address_id'], $route['start_date'], $route['end_date']);
+                    $order_segments[$k] = $order->addSegment($route['courier_party_id'], $route['type'], $route['shipping_type'], $route['reference_id'], $route['pickup_address_id'], $route['delivery_address_id'], $route['start_date'], $route['end_date'], $route['currency_id'], $route['amount']);
                     $order_segments[$k]['courier'] = $route['courier'];
                     $order_segments[$k]['type'] = $route['type'];
                     $order_segments[$k]['currency'] = $route['currency'];
@@ -309,9 +309,9 @@ class Order extends Model
     /**
      * Adds a segment/route to this order.
      */
-    public function addSegment($courier_party_id, $type, $shipping_type, $currency_id, $amount, $reference_id, $pickup_address_id, $delivery_address_id, $start_date = null, $end_date = null, $flagged = 0)
+    public function addSegment($courier_party_id, $type, $shipping_type, $reference_id, $pickup_address_id, $delivery_address_id, $start_date = null, $end_date = null, $currency_id = null, $amount = null, $flagged = 0, $status = 'pending', $barcode_format_1d = 'code_128', $barcode_format_2d = 'qr')
     {
-        return OrderSegment::store($this->id, $courier_party_id, $type, $shipping_type, $currency_id, $amount, $reference_id, $pickup_address_id, $delivery_address_id, $start_date, $end_date, $flagged);
+        return OrderSegment::store($this->id, $courier_party_id, $type, $shipping_type, $reference_id, $pickup_address_id, $delivery_address_id, $start_date, $end_date, $currency_id, $amount, $flagged, $status, $barcode_format_1d, $barcode_format_2d);
     }
 
     /**
