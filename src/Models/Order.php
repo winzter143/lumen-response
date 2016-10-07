@@ -355,6 +355,12 @@ class Order extends Model
             // Start the transaction.
             DB::beginTransaction();
 
+            // Update the turnaround time.
+            $tat = json_decode($this->tat, true);
+            $tat[$status] = date('r');
+            $tat = json_encode($tat);
+            $this->tat = $tat;
+
             // Update the order status.
             $this->status = $status;
             $this->status_updated_at = DB::raw('now()');
@@ -384,10 +390,6 @@ class Order extends Model
 
             // Set the status.
             $this->setStatus('picked_up', $remarks);
-
-            // Set the pick up date.
-            $this->pickup_date = $pickup_date;
-            $result = $this->save();
 
             // Look for the next segment.
             $next_segment = DB::table('consumer.order_segments')->where([['order_id', $this->id], ['id', '>', $this->active_segment_id]])->limit(1)->first();
@@ -472,25 +474,7 @@ class Order extends Model
      */
     public function delivered($remarks = null)
     {
-        try {
-            // Start the transaction.
-            DB::beginTransaction();
-            
-            // Set the status.
-            $this->setStatus('delivered', $remarks);
-
-            // Set the delivery date.
-            $this->delivery_date = DB::raw('now()');
-            $result = $this->save();
-
-            // Commit.
-            DB::commit();
-            return $this;
-        } catch (\Exception $e) {
-            // Rollback and return the error.
-            DB::rollback();
-            throw $e;
-        }
+        return $this->setStatus('delivered', $remarks);
     }
 
     /**
