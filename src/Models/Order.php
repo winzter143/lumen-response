@@ -176,6 +176,10 @@ class Order extends Model
                     $order_segments[$k]['active'] = ($k == 0) ? true : false;
                     $order_segments[$k]['pickup_address'] = $route['pickup_address'];
                     $order_segments[$k]['delivery_address'] = $route['delivery_address'];
+                    $order_segments[$k]['tat'] = [
+                        'start_date' => $route['start_date'],
+                        'end_date' => $route['end_date'],
+                    ];
                 }
 
                 // Set the active segment to be the first route.

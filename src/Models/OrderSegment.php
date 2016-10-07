@@ -21,7 +21,7 @@ class OrderSegment extends Model
      * The attributes that are mass assignable.
      * @var array
      */
-    protected $fillable = ['order_id', 'courier_party_id', 'type', 'shipping_type', 'currency_id', 'amount', 'reference_id', 'barcode_format', 'pickup_address_id', 'delivery_address_id', 'start_date', 'end_date', 'flagged', 'created_at', 'status'];
+    protected $fillable = ['order_id', 'courier_party_id', 'type', 'shipping_type', 'currency_id', 'amount', 'reference_id', 'barcode_format', 'pickup_address_id', 'delivery_address_id', 'tat', 'flagged', 'created_at', 'status'];
 
     /**
      * The table's primary key.
@@ -54,6 +54,12 @@ class OrderSegment extends Model
     public static function store($order_id, $courier_party_id, $type, $shipping_type, $reference_id, $barcode_format, $pickup_address_id, $delivery_address_id, $start_date = null, $end_date = null, $currency_id = null, $amount = null, $status = 'pending', $flagged = 0)
     {
         try {
+            // Save the start and end dates in the turnaround time column.
+            $tat = json_encode([
+                'start_date' => $start_date,
+                'end_date' => $end_date,
+            ]);
+
             // Build the attribute list.
             $attributes = [
                 'order_id' => $order_id,
@@ -64,8 +70,7 @@ class OrderSegment extends Model
                 'barcode_format' => $barcode_format,
                 'pickup_address_id' => $pickup_address_id,
                 'delivery_address_id' => $delivery_address_id,
-                'start_date' => $start_date,
-                'end_date' => $end_date,
+                'tat' => $tat,
                 'currency_id' => $currency_id,
                 'amount' => $amount,
                 'status' => $status,
