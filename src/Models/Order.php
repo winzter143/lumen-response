@@ -328,7 +328,7 @@ class Order extends Model
     {
         // Update the active segment.
         $this->active_segment_id = $segment_id;
-        $result = $this->save();
+        return $this->save();
     }
 
     /**
@@ -338,7 +338,7 @@ class Order extends Model
     {
         // Update the flag value.
         $this->flagged = 1;
-        $result = $this->save();
+        return $this->save();
     }
 
     /**
@@ -364,7 +364,7 @@ class Order extends Model
             // Update the order status.
             $this->status = $status;
             $this->status_updated_at = DB::raw('now()');
-            $result = $this->save();
+            $this->save();
 
             // Create an order event.
             $this->addEvent($status, $remarks);
@@ -424,7 +424,7 @@ class Order extends Model
             // Increment pickup_attempts.
             if ($increment) {
                 $this->pickup_attempts = DB::raw('pickup_attempts + 1');
-                $result = $this->save();
+                $this->save();
             }
 
             // Commit.
@@ -452,7 +452,7 @@ class Order extends Model
             // Increment delivery_attempts.
             if ($increment) {
                 $this->delivery_attempts = DB::raw('delivery_attempts + 1');
-                $result = $this->save();
+                $this->save();
             }
 
             // Commit.
