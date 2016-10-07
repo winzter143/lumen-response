@@ -168,8 +168,9 @@ class Order extends Model
                 // Create the order segments.
                 $order_segments = [];
                 foreach ($routes as $k => $route) {
-                    $order_segments[$k] = $order->addSegment($route['courier_party_id'], $route['shipping_type'], $route['currency_id'], $route['amount'], $route['reference_id'], $route['pickup_address_id'], $route['delivery_address_id'], $route['start_date'], $route['end_date']);
+                    $order_segments[$k] = $order->addSegment($route['courier_party_id'], $route['type'], $route['shipping_type'], $route['currency_id'], $route['amount'], $route['reference_id'], $route['pickup_address_id'], $route['delivery_address_id'], $route['start_date'], $route['end_date']);
                     $order_segments[$k]['courier'] = $route['courier'];
+                    $order_segments[$k]['type'] = $route['type'];
                     $order_segments[$k]['currency'] = $route['currency'];
                     $order_segments[$k]['active'] = ($k == 0) ? true : false;
                     $order_segments[$k]['pickup_address'] = $route['pickup_address'];
@@ -308,9 +309,9 @@ class Order extends Model
     /**
      * Adds a segment/route to this order.
      */
-    public function addSegment($courier_party_id, $shipping_type, $currency_id, $amount, $reference_id, $pickup_address_id, $delivery_address_id, $start_date = null, $end_date = null, $flagged = 0)
+    public function addSegment($courier_party_id, $type, $shipping_type, $currency_id, $amount, $reference_id, $pickup_address_id, $delivery_address_id, $start_date = null, $end_date = null, $flagged = 0)
     {
-        return OrderSegment::store($this->id, $courier_party_id, $shipping_type, $currency_id, $amount, $reference_id, $pickup_address_id, $delivery_address_id, $start_date, $end_date, $flagged);
+        return OrderSegment::store($this->id, $courier_party_id, $type, $shipping_type, $currency_id, $amount, $reference_id, $pickup_address_id, $delivery_address_id, $start_date, $end_date, $flagged);
     }
 
     /**

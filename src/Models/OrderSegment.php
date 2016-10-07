@@ -21,7 +21,7 @@ class OrderSegment extends Model
      * The attributes that are mass assignable.
      * @var array
      */
-    protected $fillable = ['order_id', 'courier_party_id', 'shipping_type', 'currency_id', 'amount', 'reference_id', 'pickup_address_id', 'delivery_address_id', 'start_date', 'end_date', 'flagged', 'created_at', 'status', 'barcode_format_1d', 'barcode_format_2d'];
+    protected $fillable = ['order_id', 'courier_party_id', 'type', 'shipping_type', 'currency_id', 'amount', 'reference_id', 'pickup_address_id', 'delivery_address_id', 'start_date', 'end_date', 'flagged', 'created_at', 'status', 'barcode_format_1d', 'barcode_format_2d'];
 
     /**
      * The table's primary key.
@@ -51,13 +51,14 @@ class OrderSegment extends Model
     /**
      * Creates a new segment.
      */
-    public static function store($order_id, $courier_party_id, $shipping_type, $currency_id, $amount, $reference_id, $pickup_address_id, $delivery_address_id, $start_date, $end_date, $flagged, $status = 'pending', $barcode_format_1d = 'code_128', $barcode_format_2d = 'qr')
+    public static function store($order_id, $courier_party_id, $type, $shipping_type, $currency_id, $amount, $reference_id, $pickup_address_id, $delivery_address_id, $start_date, $end_date, $flagged, $status = 'pending', $barcode_format_1d = 'code_128', $barcode_format_2d = 'qr')
     {
         try {
             // Build the attribute list.
             $attributes = [
                 'order_id' => $order_id,
                 'courier_party_id' => $courier_party_id,
+                'type' => $type,
                 'shipping_type' => $shipping_type,
                 'currency_id' => $currency_id,
                 'amount' => $amount,
