@@ -169,6 +169,7 @@ abstract class Courier
             'start_date' => $order['created_at'],
             'end_date' => null,
             'reference_id' => $pickup->getReferenceId($order['tracking_number']),
+            'barcode_format' => array_get($pickup->metadata, 'barcode_format'),
 
             // TODO: patch these later when we integrate with 3rd party couriers.
             'shipping_type' => config('settings.defaults.shipping_type'),
@@ -190,6 +191,7 @@ abstract class Courier
             'start_date' => null,
             'end_date' => null,
             'reference_id' => $delivery->getReferenceId($order['tracking_number']),
+            'barcode_format' => array_get($delivery->metadata, 'barcode_format'),
 
             // TODO: patch these later when we integrate with 3rd party couriers.
             'shipping_type' => config('settings.defaults.shipping_type'),

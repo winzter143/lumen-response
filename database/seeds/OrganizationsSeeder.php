@@ -1,6 +1,7 @@
 <?php
 use Illuminate\Database\Seeder;
 use F3\models\Address;
+use F3\components\Model;
 
 class OrganizationsSeeder extends Seeder
 {
@@ -9,13 +10,16 @@ class OrganizationsSeeder extends Seeder
      */
     private $organizations = [[
         'type' => 'company',
-        'name' => 'LBCX'
+        'name' => 'LBCX',
+        'metadata' => null
     ], [
         'type' => 'merchant',
-        'name' => 'Shopee'
+        'name' => 'Shopee',
+        'metadata' => null
     ], [
         'type' => 'merchant',
-        'name' => 'Lazada'
+        'name' => 'Lazada',
+        'metadata' => null
     ], [
         'type' => 'courier',
         'name' => 'LBC',
@@ -25,6 +29,9 @@ class OrganizationsSeeder extends Seeder
             'city' => 'Pasay',
             'state' => 'Manila',
             'postal_code' => '1301',
+        ],
+        'metadata' => [
+            'barcode_format' => 'code_128'
         ],
     ], [
         'type' => 'courier',
@@ -36,6 +43,9 @@ class OrganizationsSeeder extends Seeder
             'state' => 'Manila',
             'postal_code' => '1203',
         ],
+        'metadata' => [
+            'barcode_format' => 'qr'
+        ],
     ], [
         'type' => 'courier',
         'name' => 'LBCX QC',
@@ -45,6 +55,9 @@ class OrganizationsSeeder extends Seeder
             'city' => 'Quezon City',
             'state' => 'Manila',
             'postal_code' => '1100',
+        ],
+        'metadata' => [
+            'barcode_format' => 'qr'
         ],
     ], [
         'type' => 'courier',
@@ -56,6 +69,9 @@ class OrganizationsSeeder extends Seeder
             'state' => 'Manila',
             'postal_code' => '1226',
         ],
+        'metadata' => [
+            'barcode_format' => 'qr'
+        ],
     ], [
         'type' => 'courier',
         'name' => 'LBCX Greenhills',
@@ -65,6 +81,9 @@ class OrganizationsSeeder extends Seeder
             'city' => 'San Juan',
             'state' => 'Manila',
             'postal_code' => '1500',
+        ],
+        'metadata' => [
+            'barcode_format' => 'qr'
         ],
     ], [
         'type' => 'courier',
@@ -76,12 +95,17 @@ class OrganizationsSeeder extends Seeder
             'state' => 'Cebu',
             'postal_code' => '6000',
         ],
+        'metadata' => [
+            'barcode_format' => 'qr'
+        ],
     ], [
         'type' => 'merchant',
         'name' => 'CMO',
+        'metadata' => null
     ], [
         'type' => 'merchant',
         'name' => 'Shipping Cart',
+        'metadata' => null
     ]];
 
     /**
@@ -94,36 +118,48 @@ class OrganizationsSeeder extends Seeder
             // Start the transaction.
             DB::beginTransaction();
 
-            // Reset the tables.
-            DB::statement('TRUNCATE TABLE core.parties, core.organizations RESTART IDENTITY CASCADE');
-
             // Insert the organizations.
             foreach ($this->organizations as $org) {
-                $party_id = DB::table('core.parties')->insertGetId(['type' => 'organization', 'created_at' => 'now()']);
-                DB::table('core.organizations')->insert(['party_id' => $party_id, 'type' => $org['type'], 'name' => $org['name']]);
+                // Check if the party exists.
+                $party_id = DB::table('core.organizations')->where('name', $org['name'])->value('party_id');
+
+                if ($party_id) {
+                    // The organization exist. Update it.
+                    DB::table('core.parties')->where('id', $party_id)->update(['metadata' => ($org['metadata']) ? json_encode($org['metadata']) : null]);
+                } else {
+                    // The organization does not exist. Create it.
+                    $party_id = DB::table('core.parties')->insertGetId(['type' => 'organization', 'metadata' => ($org['metadata']) ? json_encode($org['metadata']) : null, 'created_at' => 'now()']);
+                }
+
+                // Create the organization.
+                DB::table('core.organizations')->updateOrInsert(['party_id' => $party_id], ['party_id' => $party_id, 'type' => $org['type'], 'name' => $org['name']]);
 
                 // Create three keys for the organization.
-                if ($org['type'] == 'merchant') {
-                    for ($i = 0; $i < 3; $i++) {
-                        // Generate a key.
-                        $key = __generate_api_key($party_id);
+                $result = DB::table('core.api_keys')->where('party_id', $party_id)->get();
 
-                        // Create the keys.
-                        DB::table('core.api_keys')->insert(['party_id' => $party_id, 'api_key' => $key['api_key'], 'secret_key' => $key['secret_key'], 'created_at' => 'now()', 'expires_at' => $key['expires_at']]);
+                if (!$result) {
+                    if ($org['type'] == 'merchant') {
+                        for ($i = 0; $i < 3; $i++) {
+                            // Generate a key.
+                            $key = __generate_api_key($party_id);
+
+                            // Create the keys.
+                            DB::table('core.api_keys')->updateOrInsert(['party_id' => $party_id, 'api_key' => $key['api_key'], 'secret_key' => $key['secret_key'], 'created_at' => 'now()', 'expires_at' => $key['expires_at']]);
+                        }
                     }
                 }
 
                 // Get the location ID of PH.
-                $location_id = DB::table('core.locations')->where([['type', 'country'], ['code', 'PH']])->value('id');
+                $country_id = DB::table('core.locations')->where([['type', 'country'], ['code', 'PH']])->value('id');
 
                 // Create the warehouse address.
                 if ($org['type'] == 'courier') {
-                    DB::table('core.addresses')->insert(array_merge(
+                    DB::table('core.addresses')->updateOrInsert(['party_id' => $party_id, 'type' => 'warehouse'], array_merge(
                         $org['warehouse'], [
                             'hash' => Address::hash(array_merge($org['warehouse'], ['party_id' => $party_id])),
                             'type' => 'warehouse',
                             'party_id' => $party_id,
-                            'location_id' => $location_id,
+                            'country_id' => $country_id,
                         ]
                     ));
                 }
@@ -132,7 +168,7 @@ class OrganizationsSeeder extends Seeder
                 if ($org['type'] == 'merchant') {
                     // Get the client role.
                     $role_id = DB::table('core.roles')->where('name', 'client')->value('id');
-                    DB::table('core.party_roles')->insert([
+                    DB::table('core.party_roles')->updateOrInsert(['party_id' => $party_id, 'role_id' => $role_id], [
                         'party_id' => $party_id,
                         'role_id' => $role_id
                     ]);

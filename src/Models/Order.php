@@ -168,9 +168,10 @@ class Order extends Model
                 // Create the order segments.
                 $order_segments = [];
                 foreach ($routes as $k => $route) {
-                    $order_segments[$k] = $order->addSegment($route['courier_party_id'], $route['type'], $route['shipping_type'], $route['reference_id'], $route['pickup_address_id'], $route['delivery_address_id'], $route['start_date'], $route['end_date'], $route['currency_id'], $route['amount']);
+                    $order_segments[$k] = $order->addSegment($route['courier_party_id'], $route['type'], $route['shipping_type'], $route['reference_id'], $route['barcode_format'], $route['pickup_address_id'], $route['delivery_address_id'], $route['start_date'], $route['end_date'], $route['currency_id'], $route['amount']);
                     $order_segments[$k]['courier'] = $route['courier'];
                     $order_segments[$k]['type'] = $route['type'];
+                    $order_segments[$k]['barcode_format'] = $route['barcode_format'];
                     $order_segments[$k]['currency'] = $route['currency'];
                     $order_segments[$k]['active'] = ($k == 0) ? true : false;
                     $order_segments[$k]['pickup_address'] = $route['pickup_address'];
@@ -309,9 +310,9 @@ class Order extends Model
     /**
      * Adds a segment/route to this order.
      */
-    public function addSegment($courier_party_id, $type, $shipping_type, $reference_id, $pickup_address_id, $delivery_address_id, $start_date = null, $end_date = null, $currency_id = null, $amount = null, $flagged = 0, $status = 'pending', $barcode_format_1d = 'code_128', $barcode_format_2d = 'qr')
+    public function addSegment($courier_party_id, $type, $shipping_type, $reference_id, $barcode_format, $pickup_address_id, $delivery_address_id, $start_date = null, $end_date = null, $currency_id = null, $amount = null, $status = 'pending', $flagged = 0)
     {
-        return OrderSegment::store($this->id, $courier_party_id, $type, $shipping_type, $reference_id, $pickup_address_id, $delivery_address_id, $start_date, $end_date, $currency_id, $amount, $flagged, $status, $barcode_format_1d, $barcode_format_2d);
+        return OrderSegment::store($this->id, $courier_party_id, $type, $shipping_type, $reference_id, $barcode_format, $pickup_address_id, $delivery_address_id, $start_date, $end_date, $currency_id, $amount, $status, $flagged);
     }
 
     /**

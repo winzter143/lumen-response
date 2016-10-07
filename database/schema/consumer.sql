@@ -68,8 +68,7 @@ CREATE INDEX orders_contact_number_fts_idx ON consumer.orders USING gin(to_tsvec
 --
 -- Table structure for table orders
 --,
-CREATE TYPE consumer.barcode_format_1d AS ENUM ('upc', 'ean', 'code_39', 'code_93', 'code_128', 'itf', 'codabar', 'gs1_databar', 'msi_plessey');
-CREATE TYPE consumer.barcode_format_2d AS ENUM ('qr', 'datamatrix', 'pdf_417', 'aztec');
+CREATE TYPE consumer.barcode_format AS ENUM ('upc', 'ean', 'code_39', 'code_93', 'code_128', 'itf', 'codabar', 'gs1_databar', 'msi_plessey', 'qr', 'datamatrix', 'pdf_417', 'aztec');
 CREATE TYPE consumer.shipping_type AS ENUM ('land', 'sea', 'air');
 CREATE TYPE consumer.order_segment_type AS ENUM ('pick_up', 'transfer', 'delivery');
 CREATE TABLE consumer.order_segments
@@ -85,8 +84,7 @@ CREATE TABLE consumer.order_segments
   reference_id VARCHAR(100),
   pickup_address_id INT NOT NULL,
   delivery_address_id INT NOT NULL,
-  barcode_format_1d consumer.barcode_format_1d NOT NULL,
-  barcode_format_2d consumer.barcode_format_2d NOT NULL,
+  barcode_format consumer.barcode_format NOT NULL,
   start_date TIMESTAMP WITH TIME ZONE,
   end_date TIMESTAMP WITH TIME ZONE,
   flagged SMALLINT NOT NULL DEFAULT 0,
