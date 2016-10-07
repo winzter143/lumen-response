@@ -46,6 +46,7 @@ CREATE TABLE consumer.orders
   preferred_delivery_time VARCHAR(100),
   tat JSONB,
   pickup_attempts SMALLINT NOT NULL DEFAULT 0,
+  delivery_attempts SMALLINT NOT NULL DEFAULT 0,
   status_updated_at TIMESTAMP WITH TIME ZONE,
   flagged SMALLINT NOT NULL DEFAULT 0,
   created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,

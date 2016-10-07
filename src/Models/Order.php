@@ -440,9 +440,29 @@ class Order extends Model
     /**
      * Updates the order status to "in_transit".
      */
-    public function inTransit($remarks = null)
+    public function inTransit($remarks = null, $increment = true)
     {
-        return $this->setStatus('in_transit', $remarks);
+        try {
+            // Start the transaction.
+            DB::beginTransaction();
+
+            // Set the status.
+            $this->setStatus('in_transit', $remarks);
+
+            // Increment delivery_attempts.
+            if ($increment) {
+                $this->delivery_attempts = DB::raw('delivery_attempts + 1');
+                $result = $this->save();
+            }
+
+            // Commit.
+            DB::commit();
+            return $this;
+        } catch (\Exception $e) {
+            // Rollback and return the error.
+            DB::rollback();
+            throw $e;
+        }
     }
     
     /**
