@@ -151,11 +151,11 @@ CREATE TABLE consumer.deposits
 --
 -- Table structure for table charges
 --
-CREATE TYPE consumer.charge_status AS ENUM ('created', 'assigned', 'paid', 'remitted', 'paid_out');
+CREATE TYPE consumer.charge_status AS ENUM ('pending', 'assigned', 'paid', 'remitted', 'paid_out');
 CREATE TABLE consumer.charges
 (
   order_id INT NOT NULL,
-  status consumer.charge_status NOT NULL DEFAULT 'created',
+  status consumer.charge_status NOT NULL DEFAULT 'pending',
   payment_method consumer.payment_method NOT NULL, 
   collector_party_id INT,
   deposit_id INT,

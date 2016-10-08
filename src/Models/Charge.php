@@ -30,7 +30,7 @@ class Charge extends Model
     {
         return [
             'order_id' => 'integer|required|exists:pgsql.consumer.orders,id',
-            'status' => 'string|required|in:created,assigned,paid,remitted,paid_out',
+            'status' => 'string|required|in:pending,assigned,paid,remitted,paid_out',
             'payment_method' => 'string|required|in:' . implode(',', array_keys(config('settings.payment_methods'))),
             'collector_party_id' => 'integer|nullable|exists:pgsql.core.parties,id',
             'deposit_id' => 'integer|nullable|exists:pgsql.consumer.deposits,id',
@@ -45,7 +45,7 @@ class Charge extends Model
     /**
      * Creates a new order.
      */
-    public static function store($order_id, $total_amount, $payment_method = null, $status = 'created', $tendered_amount = 0, $change_amount = 0, $remarks = null, $collector_party_id = null, $deposit_id = null, $updated_by = null)
+    public static function store($order_id, $total_amount, $payment_method = null, $status = 'pending', $tendered_amount = 0, $change_amount = 0, $remarks = null, $collector_party_id = null, $deposit_id = null, $updated_by = null)
     {
         try {
             // Build the attribute list.
