@@ -59,6 +59,14 @@ class Order extends Model
     }
 
     /**
+     * An order has a charge.
+     */
+    public function charge()
+    {
+        return $this->hasOne('F3\Models\Charge');
+    }
+
+    /**
      * Returns the next ID in the sequence.
      */
     public static function getNextId()
@@ -500,7 +508,38 @@ class Order extends Model
      */
     public function delivered($remarks = null)
     {
-        return $this->setStatus('delivered', $remarks);
+        try {
+            // Start the transaction.
+            DB::beginTransaction();
+
+            // Set the status.
+            $this->setStatus('delivered', $remarks);
+
+            // Set the charge status to "paid" if it's a COD order.
+            if ($this->payment_method == 'cod') {
+                // Get the charge object.
+                $charge = $this->charge()->first();
+
+                if (!$charge) {
+                    throw new \Exception('COD order has no charge.');
+                }
+
+                // Update the charge status.
+                // TODO:
+                // Determine where to get $tendered_amount, $change_amount, and $remarks.
+                // Pass the order total for now.
+                // $charge->paid($tendered_amount, $change_amount = 0, $remarks = null);
+                $charge->paid($this->grand_total, 0, null);
+            }
+
+            // Commit.
+            DB::commit();
+            return $this;
+        } catch (\Exception $e) {
+            // Rollback and return the error.
+            DB::rollback();
+            throw $e;
+        }
     }
 
     /**

@@ -43,6 +43,39 @@ class Charge extends Model
     }
 
     /**
+     * A charge belongs to an order.
+     */
+    public function order()
+    {
+        return $this->belongsTo('F3\Models\Order');
+    }
+
+    /**
+     * Sets the the charge status to "paid".
+     */
+    public function paid($tendered_amount, $change_amount = 0, $remarks = null)
+    {
+        // Check if the current status is the same as the new one.
+        if ($this->status == 'delivered') {
+            return $this;
+        }
+
+        // The tendered amount should be greater than the total amount.
+        if ($tendered_amount < $this->total_amount) {
+            throw new \Exception('Tendered amount should be greater than total amount.');
+        }
+
+        // Update the charge.
+        $this->status = 'paid';
+        $this->tendered_amount = $tendered_amount;
+        $this->change_amount = $change_amount;
+        $this->remarks = $remarks;
+        $this->save();
+
+        return $this;
+    }
+
+    /**
      * Creates a new order.
      */
     public static function store($order_id, $total_amount, $payment_method = null, $status = 'pending', $tendered_amount = 0, $change_amount = 0, $remarks = null, $collector_party_id = null, $deposit_id = null, $updated_by = null)

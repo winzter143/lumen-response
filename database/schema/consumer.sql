@@ -151,7 +151,7 @@ CREATE TABLE consumer.deposits
 --
 -- Table structure for table charges
 --
-CREATE TYPE consumer.charge_status AS ENUM ('pending', 'assigned', 'paid', 'remitted', 'paid_out');
+CREATE TYPE consumer.charge_status AS ENUM ('pending', 'paid', 'deposited');
 CREATE TABLE consumer.charges
 (
   order_id INT NOT NULL,
