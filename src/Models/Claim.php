@@ -16,7 +16,7 @@ class Claim extends Model
      * The attributes that are mass assignable.
      * @var array
      */
-    protected $fillable = ['order_id', 'status', 'reason', 'amount', 'shipping_fee_flag', 'insurance_fee_flag', 'transaction_fee_flag', 'documentary_proof_url', 'remarks', 'created_at', 'created_by', 'updated_at', 'updated_by'];
+    protected $fillable = ['order_id', 'status', 'reason', 'amount', 'shipping_fee_flag', 'insurance_fee_flag', 'transaction_fee_flag', 'assets', 'remarks', 'created_at', 'created_by', 'updated_at', 'updated_by'];
 
     /**
      * The table's primary key.
@@ -37,7 +37,7 @@ class Claim extends Model
             'shipping_fee_flag' => 'integer|in:0,1',
             'insurance_fee_flag' => 'integer|in:0,1',
             'transaction_fee_flag' => 'integer|in:0,1',
-            'documentary_proof_url' => 'url|nullable',
+            'assets' => 'json|nullable',
             'remarks' => 'string|nullable'
         ];
 
@@ -46,8 +46,16 @@ class Claim extends Model
 
     /**
      * Creates a new order.
+     * @param int $order_id Order ID
+     * @param float $amount Amount to be claimed
+     * @param string $reason Claim reason
+     * @param int $shipping_fee_flag Set to 1 to refund shipping fee, set to 0 otherwise
+     * @param int $insurance_fee_flag Set to 1 to refund insurance fee, set to 0 otherwise
+     * @param int $transaction_fee_flag Set to 1 to refund transaction fee, set to 0 otherwise
+     * @param string $remarks Miscellaneous remarks
+     * @param string $status Claim status
      */
-    public static function store($order_id, $amount, $reason, $documentary_proof_url = null, $shipping_fee_flag = 0, $insurance_fee_flag = 0, $transaction_fee_flag = 0, $remarks = null, $status = 'pending')
+    public static function store($order_id, $amount, $reason, $assets = null, $shipping_fee_flag = 0, $insurance_fee_flag = 0, $transaction_fee_flag = 0, $remarks = null, $status = 'pending')
     {
         try {
             // Start the transaction.
@@ -55,7 +63,7 @@ class Claim extends Model
 
             // Perform additional checks.
             // Fetch the order and merchant contract.
-            $order = DB::table('consumer.orders as o')->select(['o.delivery_date', 'o.status', 'o.grand_total', 'p.metadata'])->join('core.parties as p', 'p.id', '=', 'o.party_id')->where([['o.id', $order_id], ['p.status', 1]])->first();
+            $order = DB::table('consumer.orders as o')->select(['o.tat', 'o.status', 'o.grand_total', 'p.metadata'])->join('core.parties as p', 'p.id', '=', 'o.party_id')->where([['o.id', $order_id], ['p.status', 1]])->first();
 
             if (!$order) {
                 throw new \Exception('The order does not exist.', 422);
@@ -68,19 +76,20 @@ class Claim extends Model
                 throw new \Exception('This order has already been claimed.', 422);
             }
 
-            // Get the contract.
+            // Get the contract and turnaround time.
             $contract = json_decode($order['metadata'], true);
+            $tat = json_decode($order['tat'], true);
 
             // Get the claim period from the contract.
             $claim_period = array_get($contract, 'claim_period', config('settings.defaults.contract.claim_period'));
 
-            // The order status should be "delivered".
-            if ($order['status'] != 'delivered') {
+            // The order status should be "delivered" and the "delivered" timestamp should be present in $tat.
+            if ($order['status'] != 'delivered' || !isset($tat['delivered'])) {
                 throw new \Exception('The order has not yet been delivered.', 422);
             }
 
             // The order status should be "delivered".
-            if (round((time() - strtotime($order['delivery_date'])) / 60 / 60 / 24) > $claim_period) {
+            if (round((time() - strtotime($tat['delivered'])) / 60 / 60 / 24) > $claim_period) {
                 throw new \Exception('The order can only be claimed within ' . $claim_period . ' days of delivery.', 422);
             }
 
@@ -94,7 +103,7 @@ class Claim extends Model
                 'order_id' => $order_id,
                 'amount' => $amount,
                 'reason' => $reason,
-                'documentary_proof_url' => $documentary_proof_url,
+                'assets' => json_encode($assets),
                 'shipping_fee_flag' => $shipping_fee_flag,
                 'insurance_fee_flag' => $insurance_fee_flag,
                 'transaction_fee_flag' => $transaction_fee_flag,

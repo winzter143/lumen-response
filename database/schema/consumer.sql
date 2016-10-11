@@ -184,7 +184,7 @@ CREATE TABLE consumer.claims
   shipping_fee_flag SMALLINT NOT NULL DEFAULT 0,
   insurance_fee_flag SMALLINT NOT NULL DEFAULT 0,
   transaction_fee_flag SMALLINT NOT NULL DEFAULT 0,
-  documentary_proof_url TEXT,
+  assets JSONB,
   reason TEXT NOT NULL,
   remarks TEXT,
   created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,

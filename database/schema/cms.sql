@@ -17,8 +17,8 @@ CREATE TABLE cms.assets
   content TEXT,
   created_by INT,
   created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  modified_by INT,
-  modified_at  TIMESTAMP WITH TIME ZONE,
+  updated_by INT,
+  updated_at  TIMESTAMP WITH TIME ZONE,
   PRIMARY KEY (id)
 );
 
