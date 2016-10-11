@@ -11,11 +11,6 @@ use F3\Models\Address;
 abstract class Courier
 {
     /**
-     * Class constants.
-     */
-    const DEFAULT_SHIPPING_TYPE = 'land';
-    
-    /**
      * List of couriers.
      * Note: The ordering of the list affects the behavior of the pickup and delivery methods.
      * @var array $couriers
@@ -177,7 +172,7 @@ abstract class Courier
             'barcode_format' => array_get($pickup->metadata, 'barcode_format'),
 
             // TODO: patch these later when we integrate with 3rd party couriers.
-            'shipping_type' => self::DEFAULT_SHIPPING_TYPE,
+            'shipping_type' => config('settings.defaults.shipping_type'),
             'currency' => null,
             'currency_id' => null,
             'amount' => null,
@@ -199,7 +194,7 @@ abstract class Courier
             'barcode_format' => array_get($delivery->metadata, 'barcode_format'),
 
             // TODO: patch these later when we integrate with 3rd party couriers.
-            'shipping_type' => self::DEFAULT_SHIPPING_TYPE,
+            'shipping_type' => config('settings.defaults.shipping_type'),
             'currency' => null,
             'currency_id' => null,
             'amount' => null,

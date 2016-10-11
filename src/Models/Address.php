@@ -6,12 +6,6 @@ use F3\Components\Model;
 
 class Address extends Model
 {
-
-    /**
-     * Class constants.
-     */
-    const LOCAL_AREAS = ['Manila', 'Metro Manila', 'NCR', 'National Capital Region'];
-    
     /**
      * The table associated with the model.
      * @var string
@@ -131,7 +125,7 @@ class Address extends Model
         $address = self::format($address, ', ');
 
         // Fetch the local delivery areas.
-        $areas = self::LOCAL_AREAS;
+        $areas = config('settings.local_areas');
 
         // Check if the address is a provincial address.
         foreach ($areas as $area) {

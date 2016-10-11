@@ -9,19 +9,6 @@ use F3\Models\Party;
 class JWT 
 {
     /**
-     * Class constants.
-     */
-    const JWT_CONFIG = [
-        // Default algorithm and token type.
-        'alg' => 'HS256',
-        'typ' => 'JWT',
-        'cache_expiry' => 1440,
-        
-        // Maximum time() and iat difference in seconds.
-        'max_iat' => 10
-    ];
-    
-    /**
      * Creates a new token.
      */
     public static function createToken($payload, $secret_key, $header = null)
@@ -29,8 +16,8 @@ class JWT
         // Set the default header.
         if (!$header) {
             $header = [
-                'alg' => self::JWT_CONFIG['alg'],
-                'typ' => self::JWT_CONFIG['typ']
+                'alg' => config('settings.jwt.alg'),
+                'typ' => config('settings.jwt.typ')
             ];
         }
 
@@ -81,7 +68,7 @@ class JWT
                  * Note: disabling iat check for now.
                 $diff = time() - $token['payload']['iat'];
                 
-                if ($diff < 0 || $diff > self::JWT_CONFIG['max_iat']) {
+                if ($diff < 0 || $diff > config('settings.jwt.max_iat')) {
                    throw new \Exception('Invalid token. Please check the iat value.', 401);
                 }
                 */
@@ -99,7 +86,7 @@ class JWT
                 }
 
                 // Cache it.
-                Cache::put($token['payload']['sub'], $token['party'], self::JWT_CONFIG['cache_expiry']);
+                Cache::put($token['payload']['sub'], $token['party'], config('settings.cache.expires_in'));
             }
 
             // Check the signature.

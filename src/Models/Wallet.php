@@ -26,7 +26,7 @@ class Wallet extends Model
     /**
      * Wallet types.
      */
-    const TYPES = ['fund', 'sales', 'settlement', 'collections'];
+    private const TYPES = ['fund', 'sales', 'settlement', 'collections'];
     
     /**
      * Returns the model validation rules.

@@ -6,13 +6,6 @@ use Illuminate\Support\ServiceProvider;
 class CorsServiceProvider extends ServiceProvider
 {
     /**
-     * Class constants.
-     */
-    const CORS = [
-        'allowed_origins' => ['http://orders.local.lbcx.ph:3000', 'http://orders.staging.lbcx.ph']
-    ];
-
-    /**
      * Register any application services.
      * @return void
      */
@@ -24,7 +17,7 @@ class CorsServiceProvider extends ServiceProvider
         // Fetch the origin.
         $origin = isset($_SERVER['HTTP_ORIGIN']) ? $_SERVER['HTTP_ORIGIN'] : false;
 
-        if (strtolower($request->method()) == 'options' && in_array($origin, self::CORS['allowed_origins'])) {
+        if (strtolower($request->method()) == 'options' && in_array($origin, config('settings.cors.allowed_origins'))) {
             app()->options($request->path(), function() use($origin) {
                 return response('OK', 200)
                     ->header('Access-Control-Allow-Origin', $origin)

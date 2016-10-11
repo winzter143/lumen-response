@@ -31,7 +31,7 @@ class Charge extends Model
         return [
             'order_id' => 'integer|required|exists:pgsql.consumer.orders,id',
             'status' => 'string|required|in:pending,assigned,paid,remitted,paid_out',
-            'payment_method' => 'string|required|in:' . implode(',', array_keys(Order::PAYMENT['methods'])),
+            'payment_method' => 'string|required|in:' . implode(',', array_keys(config('settings.payment_methods'))),
             'collector_party_id' => 'integer|nullable|exists:pgsql.core.parties,id',
             'deposit_id' => 'integer|nullable|exists:pgsql.consumer.deposits,id',
             'total_amount' => 'numeric|required|min:0|max:999999999999.99',

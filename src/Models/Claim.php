@@ -72,7 +72,7 @@ class Claim extends Model
             $contract = json_decode($order['metadata'], true);
 
             // Get the claim period from the contract.
-            $claim_period = array_get($contract, 'claim_period', Organization::DEFAULT_CONTRACT['claim_period']);
+            $claim_period = array_get($contract, 'claim_period', config('settings.defaults.contract.claim_period'));
 
             // The order status should be "delivered".
             if ($order['status'] != 'delivered') {

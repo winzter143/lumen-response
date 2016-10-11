@@ -11,29 +11,6 @@ class Organization extends Model
      * This class is shared between the User and Organization models.
      */
     use \F3\Components\RBAC;
-
-    /**
-     * Class constants.
-     */
-    const DEFAULT_CONTRACT = [
-        'shipping_fee' => [
-            'manila' => 100,
-            'provincial' => 150
-        ],
-        'insurance_fee' => [
-            'type' => 'percent',
-            'value' => 0.01,
-            'max' => 5
-        ],
-        'transaction_fee' => [
-            'type' => 'percent',
-            'value' => 0.03,
-            'max' => 20
-        ],
-        'pickup_retries' => 3,
-        // Within 7 days of delivery.
-        'claim_period' => 7
-    ];
     
     /**
      * The table associated with the model.
