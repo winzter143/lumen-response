@@ -8,6 +8,41 @@ use F3\Components\Courier;
 class Order extends Model
 {
     /**
+     * Class constants.
+     */
+    const DEFAULT_CURRENCY = 'PHP';
+
+    const PAYMENT = [
+        'methods' => [
+            'credit_card' => 'Credit Card',
+            'debit_card' => 'Debit Cart',
+            'otc' => 'Bank Deposit / OTC',
+            'cod' => 'Cash on Delivery'
+        ],
+        'providers' => [
+            'asiapay' => 'Asiapay',
+            'dragonpay' => 'Dragonpay',
+            'lbc' => 'LBC Expresses',
+            'lbcx' => 'LBCX'
+        ]
+    ];
+        
+    const ORDER_STATUSES = [
+        'pending' => 'Pending',
+        'for_pickup' => 'Ready for pickup',
+        'picked_up' => 'Picked up',
+        'failed_pickup' => 'Failed pickup',
+        'in_transit' => 'In transit',
+        'claimed' => 'Claimed',
+        'out_for_delivery' => 'Out for delivery',
+        'delivered' => 'Delivered',
+        'failed_delivery' => 'Failed delivery',
+        'return_in_transit' => 'Returned - in transit',
+        'returned' => 'Returned',
+        'failed_return' => 'Failed return'
+    ];
+    
+    /**
      * The table associated with the model.
      * @var string
      */
@@ -31,9 +66,9 @@ class Order extends Model
             'pickup_address_id' => 'integer|required|exists:pgsql.core.addresses,id',
             'delivery_address_id' => 'integer|required|exists:pgsql.core.addresses,id',
             'tracking_number' => 'string|max:15',
-            'payment_method' => 'string|required|in:' . implode(',', array_keys(config('settings.payment_methods'))),
-            'payment_provider' => 'string|required|in:' . implode(',', array_keys(config('settings.payment_providers'))),
-            'status' => 'string|in:' . implode(',', array_keys(config('settings.order_statuses'))),
+            'payment_method' => 'string|required|in:' . implode(',', array_keys(self::PAYMENT['methods'])),
+            'payment_provider' => 'string|required|in:' . implode(',', array_keys(self::PAYMENT['providers'])),
+            'status' => 'string|in:' . implode(',', array_keys(self::ORDER_STATUSES)),
             'buyer_name' => 'string|required|max:100',
             'email' => 'string|email|max:50|required_without:contact_number',
             'contact_number' => 'string|max:50|required_without:email',
@@ -235,7 +270,7 @@ class Order extends Model
         $order['party_id'] = $party_id;
 
         // Determine the currency ID.
-        $order['currency_id'] = array_get($currencies, array_get($order, 'currency', config('settings.defaults.currency')));
+        $order['currency_id'] = array_get($currencies, array_get($order, 'currency', self::DEFAULT_CURRENCY));
 
         if (!$order['currency_id']) {
             throw new \Exception('The provided currency code is not valid.', 422);
@@ -581,7 +616,7 @@ class Order extends Model
     public function retryPickup($remarks = null)
     {
         // Get the default contract.
-        $default = config('settings.defaults.contract');
+        $default = Organization::DEFAULT_CONTRACT;
 
         // Get the client contract.
         $contract = Party::getMetaData($this->party_id, 'contract');
@@ -665,7 +700,7 @@ class Order extends Model
     public static function getFees($party_id, $grand_total, $delivery_address, $payment_method)
     {
         // Get the default contract.
-        $default = config('settings.defaults.contract');
+        $default = Organization::DEFAULT_CONTRACT;
 
         // Fetch the client contract.
         $contract = Party::getMetaData($party_id, 'contract');

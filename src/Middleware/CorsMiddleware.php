@@ -3,6 +3,7 @@ namespace F3\Middleware;
 
 use Illuminate\Http\Request;
 use F3\Components\Response;
+use F3\Providers\CorsServiceProvider;
 use Closure;
 
 class CorsMiddleware
@@ -19,7 +20,7 @@ class CorsMiddleware
             // Fetch the origin.
             $origin = isset($_SERVER['HTTP_ORIGIN']) ? $_SERVER['HTTP_ORIGIN'] : false;
             
-            if (in_array($origin, config('settings.cors.allowed_origins'))) {
+            if (in_array($origin, CorsServiceProvider::CORS['allowed_origins'])) {
                 // Origin is allowed. Add the access control headers.
                 return $next($request)
                     ->header('Access-Control-Allow-Origin', $origin)
