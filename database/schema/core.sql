@@ -147,7 +147,7 @@ CREATE TABLE core.party_roles (
 --
 -- Table structure for table addresses
 --
-CREATE TYPE core.address_type AS ENUM ('pickup', 'delivery', 'warehouse');
+CREATE TYPE core.address_type AS ENUM ('pickup', 'delivery', 'business');
 CREATE TABLE core.addresses
 (
   id SERIAL,
