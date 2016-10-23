@@ -39,6 +39,10 @@ class OrganizationsSeeder extends Seeder
         'role' => 'client',
         'metadata' => null
     ], [
+        'name' => 'i4 Asia',
+        'role' => 'client',
+        'metadata' => null
+    ], [
         'name' => 'LBCX North Hub',
         'role' => 'hub',
         'metadata' => [
@@ -149,7 +153,7 @@ class OrganizationsSeeder extends Seeder
                 if ($org['role'] == 'client') {
                     $result = DB::table('core.api_keys')->where('party_id', $party_id)->get();
 
-                    if (!$result) {
+                    if (!$result->toArray()) {
                         for ($i = 0; $i < 3; $i++) {
                             // Generate a key.
                             $key = __generate_api_key($party_id);
