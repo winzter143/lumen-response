@@ -18,12 +18,9 @@ class CurrenciesSeeder extends Seeder
             // Start the transaction.
             DB::beginTransaction();
 
-            // Reset the tables.
-            DB::statement('TRUNCATE TABLE core.currencies RESTART IDENTITY CASCADE');
-
             // Insert the currencies.
             foreach ($this->currencies as $code => $name) {
-                DB::table('core.currencies')->insert(['code' => $code, 'name' => $name, 'created_at' => 'now()']);
+                DB::table('core.currencies')->updateOrInsert(['code' => $code], ['code' => $code, 'name' => $name, 'created_at' => 'now()']);
             }
 
             // Commit.

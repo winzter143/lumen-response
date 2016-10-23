@@ -26,6 +26,16 @@ class RolesSeeder extends Seeder
             'name' => 'client',
             'display_name' => 'Client System',
             'permissions' => ['create-order'],
+        ],
+        'courier' => [
+            'name' => 'courier',
+            'display_name' => 'Courier',
+            'permissions' => [],
+        ],
+        'hub' => [
+            'name' => 'hub',
+            'display_name' => 'hub',
+            'permissions' => [],
         ]
     ];
 
@@ -39,12 +49,9 @@ class RolesSeeder extends Seeder
             // Start the transaction.
             DB::beginTransaction();
 
-            // Reset the tables.
-            DB::statement('TRUNCATE TABLE core.roles RESTART IDENTITY CASCADE');
-
             // Insert the roles.
             foreach ($this->roles as $role) {
-                DB::table('core.roles')->insert([
+                DB::table('core.roles')->updateOrInsert(['name' => $role['name']], [
                     'name' => $role['name'],
                     'display_name' => $role['display_name'],
                     'permissions' => json_encode($role['permissions']),

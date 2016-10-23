@@ -9,103 +9,101 @@ class OrganizationsSeeder extends Seeder
      * List of organizations.
      */
     private $organizations = [[
-        'type' => 'company',
         'name' => 'LBCX',
-        'metadata' => null
+        'role' => 'courier',
+        'metadata' => [
+            'priority' => 1,
+            'barcode_format' => 'qr',
+        ]
     ], [
-        'type' => 'merchant',
-        'name' => 'Shopee',
-        'metadata' => null
-    ], [
-        'type' => 'merchant',
-        'name' => 'Lazada',
-        'metadata' => null
-    ], [
-        'type' => 'courier',
         'name' => 'LBC',
-        'warehouse' => [
-            'name' => 'LBC',
-            'line_1' => 'LBC Express',
-            'city' => 'Pasay',
-            'state' => 'Manila',
-            'postal_code' => '1301',
-        ],
+        'role' => 'courier',
         'metadata' => [
-            'barcode_format' => 'code_128'
-        ],
+            'priority' => 2,
+            'barcode_format' => 'code_128',
+        ]
     ], [
-        'type' => 'courier',
-        'name' => 'LBCX Yakal',
-        'warehouse' => [
-            'name' => 'LBCX Yakal',
-            'line_1' => 'VersaPrint, Inc., 7452 A. Yakal corner Bakawan Street',
-            'city' => 'Makati',
-            'state' => 'Manila',
-            'postal_code' => '1203',
-        ],
-        'metadata' => [
-            'barcode_format' => 'qr'
-        ],
+        'name' => 'Shopee',
+        'role' => 'client',
+        'metadata' => null
     ], [
-        'type' => 'courier',
-        'name' => 'LBCX QC',
-        'warehouse' => [
-            'name' => 'LBCX QC',
-            'line_1' => 'LBCX QC',
-            'city' => 'Quezon City',
-            'state' => 'Manila',
-            'postal_code' => '1100',
-        ],
-        'metadata' => [
-            'barcode_format' => 'qr'
-        ],
+        'name' => 'Lazada',
+        'role' => 'client',
+        'metadata' => null
     ], [
-        'type' => 'courier',
-        'name' => 'LBCX Park Square',
-        'warehouse' => [
-            'name' => 'LBCX Park Square',
-            'line_1' => 'LBCX Park Square',
-            'city' => 'Makati',
-            'state' => 'Manila',
-            'postal_code' => '1226',
-        ],
-        'metadata' => [
-            'barcode_format' => 'qr'
-        ],
-    ], [
-        'type' => 'courier',
-        'name' => 'LBCX Greenhills',
-        'warehouse' => [
-            'name' => 'LBCX Greenhills',
-            'line_1' => 'LBCX Greenhills',
-            'city' => 'San Juan',
-            'state' => 'Manila',
-            'postal_code' => '1500',
-        ],
-        'metadata' => [
-            'barcode_format' => 'qr'
-        ],
-    ], [
-        'type' => 'courier',
-        'name' => 'LBCX Cebu',
-        'warehouse' => [
-            'name' => 'LBCX Cebu',
-            'line_1' => 'LBCX Cebu',
-            'city' => 'Cebu',
-            'state' => 'Cebu',
-            'postal_code' => '6000',
-        ],
-        'metadata' => [
-            'barcode_format' => 'qr'
-        ],
-    ], [
-        'type' => 'merchant',
         'name' => 'CMO',
+        'role' => 'client',
         'metadata' => null
     ], [
-        'type' => 'merchant',
         'name' => 'Shipping Cart',
+        'role' => 'client',
         'metadata' => null
+    ], [
+        'name' => 'LBCX North Hub',
+        'role' => 'hub',
+        'metadata' => [
+            'areas' => [
+                'pickup' => ['Valenzuela', 'Quezon City', 'Navotas', 'Marikina', 'Malabon', 'Caloocan'],
+                'delivery' => ['Valenzuela', 'Quezon City', 'Navotas', 'Marikina', 'Malabon', 'Caloocan']
+            ],
+        ],
+        'addresses' => [
+            'business' => [
+                'name' => 'LBCX North Hub',
+                'line_1' => 'Tandang Sora',
+                'city' => 'Quezon City',
+                'state' => 'Manila',
+                'postal_code' => '1123',
+                'country' => 'PH',
+            ],
+        ],
+        'relationships' => [
+            'department_of' => 'LBCX'
+        ]
+    ], [
+        'name' => 'LBCX South Hub',
+        'role' => 'hub',
+        'metadata' => [
+            'areas' => [
+                'pickup' => ['Taguig', 'San Juan', 'Pateros', 'Pasig', 'Pasay', 'Parañaque', 'Muntinlupa', 'Manila', 'Mandaluyong', 'Makati', 'Las Piñas'],
+                'delivery' => ['Taguig', 'San Juan', 'Pateros', 'Pasig', 'Pasay', 'Parañaque', 'Muntinlupa', 'Manila', 'Mandaluyong', 'Makati', 'Las Piñas']
+            ],
+        ],
+        'addresses' => [
+            'business' => [
+                'name' => 'LBCX South Hub',
+                'line_1' => 'Yakal',
+                'city' => 'Makati',
+                'state' => 'Manila',
+                'postal_code' => '1233',
+                'country' => 'PH',
+            ]
+        ],
+        'relationships' => [
+            'department_of' => 'LBCX'
+        ]
+    ], [
+        'name' => 'LBC Domestic Airport',
+        'role' => 'hub',
+        'metadata' => [
+            'areas' => [
+                'pickup' => '*',
+                'delivery' => '*',
+            ]
+        ],
+        'addresses' => [
+            'business' => [
+                'name' => 'LBC',
+                'line_1' => 'Domestic Airport',
+                'city' => 'Pasay',
+                'state' => 'Manila',
+                'postal_code' => '1301',
+                'country' => 'PH',
+            ],
+        ],
+        'relationships' => [
+            'department_of' => 'LBC'
+        ]
     ]];
 
     /**
@@ -132,13 +130,26 @@ class OrganizationsSeeder extends Seeder
                 }
 
                 // Create the organization.
-                DB::table('core.organizations')->updateOrInsert(['party_id' => $party_id], ['party_id' => $party_id, 'type' => $org['type'], 'name' => $org['name']]);
+                DB::table('core.organizations')->updateOrInsert(['party_id' => $party_id], ['party_id' => $party_id, 'name' => $org['name']]);
 
-                // Create three keys for the organization.
-                $result = DB::table('core.api_keys')->where('party_id', $party_id)->get();
+                // Look for the role.
+                $role_id = DB::table('core.roles')->where('name', $org['role'])->value('id');
 
-                if (!$result) {
-                    if ($org['type'] == 'merchant') {
+                if (!$role_id) {
+                    throw new \Exception('Role "' . $org['role'] . '" does not exsit.');
+                }
+
+                // Assign the role to the organization.
+                DB::table('core.party_roles')->updateOrInsert(['party_id' => $party_id, 'role_id' => $role_id], [
+                    'party_id' => $party_id,
+                    'role_id' => $role_id
+                ]);
+
+                // Create the organization keys.
+                if ($org['role'] == 'client') {
+                    $result = DB::table('core.api_keys')->where('party_id', $party_id)->get();
+
+                    if (!$result) {
                         for ($i = 0; $i < 3; $i++) {
                             // Generate a key.
                             $key = __generate_api_key($party_id);
@@ -149,29 +160,38 @@ class OrganizationsSeeder extends Seeder
                     }
                 }
 
-                // Get the location ID of PH.
-                $country_id = DB::table('core.locations')->where([['type', 'country'], ['code', 'PH']])->value('id');
+                // Create the addresses.
+                if (isset($org['addresses'])) {
+                    foreach ($org['addresses'] as $type => $address) {
+                        // Get the country ID.
+                        $country_id = DB::table('core.locations')->where([['type', 'country'], ['code', $address['country']]])->value('id');
 
-                // Create the warehouse address.
-                if ($org['type'] == 'courier') {
-                    DB::table('core.addresses')->updateOrInsert(['party_id' => $party_id, 'type' => 'warehouse'], array_merge(
-                        $org['warehouse'], [
-                            'hash' => Address::hash(array_merge($org['warehouse'], ['party_id' => $party_id])),
-                            'type' => 'warehouse',
-                            'party_id' => $party_id,
-                            'country_id' => $country_id,
-                        ]
-                    ));
+                        if (!$country_id) {
+                            throw new \Exception('Country "' . $addresses['country'] . '"" does not exist.');
+                        }
+
+                        // Create the record.
+                        unset($address['country']);
+                        DB::table('core.addresses')->updateOrInsert(['party_id' => $party_id, 'type' => $type], array_merge(
+                            $address, [
+                                'hash' => Address::hash(array_merge($address, ['party_id' => $party_id])),
+                                'type' => $type,
+                                'party_id' => $party_id,
+                                'country_id' => $country_id,
+                            ]
+                        ));
+                    }
                 }
 
-                // Create the roles.
-                if ($org['type'] == 'merchant') {
-                    // Get the client role.
-                    $role_id = DB::table('core.roles')->where('name', 'client')->value('id');
-                    DB::table('core.party_roles')->updateOrInsert(['party_id' => $party_id, 'role_id' => $role_id], [
-                        'party_id' => $party_id,
-                        'role_id' => $role_id
-                    ]);
+                // Create the relationships.
+                if (isset($org['relationships'])) {
+                    foreach ($org['relationships'] as $type => $to_party) {
+                        // Get the party ID.
+                        $to_party_id = DB::table('core.organizations')->where('name', $to_party)->value('party_id');
+
+                        // Create the relationship.
+                        DB::table('core.relationships')->updateOrInsert(['from_party_id' => $party_id, 'type' => $type, 'to_party_id' => $to_party_id], ['from_party_id' => $party_id, 'type' => $type, 'to_party_id' => $to_party_id]);
+                    }
                 }
             }
 

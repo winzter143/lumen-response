@@ -22,10 +22,16 @@ class LBC extends Courier
     protected $name;
 
     /**
-     * Warehouse address
-     * @param array $warehouse
+     * Hubs
+     * @param array $hubs
      */
-    protected $warehouse;
+    protected $hubs;
+
+    /**
+     * Selected hub
+     * @param array $hub
+     */
+    protected $hub;
 
     /**
      * Metadata
@@ -36,11 +42,12 @@ class LBC extends Courier
     /**
      * Constructor.
      */
-    public function __construct($party_id, $name, array $warehouse, array $metadata = [])
+    public function __construct($party_id, $name, array $hubs, $hub = null, array $metadata = [])
     {
         $this->party_id = $party_id;
         $this->name = $name;
-        $this->warehouse = $warehouse;
+        $this->hubs = $hubs;
+        $this->hub = $hub;
         $this->metadata = $metadata;
     }
 
@@ -61,11 +68,19 @@ class LBC extends Courier
     }
 
     /**
-     * Returns the courier warehouse address.
+     * Returns the courier hubs.
      */
-    public function getWarehouse()
+    public function getHubs()
     {
-        return $this->warehouse;
+        return $this->hubs;
+    }
+
+    /**
+     * Returns the selected hub.
+     */
+    public function getHub()
+    {
+        return $this->hub;
     }
 
     /**
@@ -74,26 +89,6 @@ class LBC extends Courier
     public function getMetadata()
     {
         return $this->metadata;
-    }
-
-    /**
-     * Returns an array of pick up areas.
-     */
-    public function getPickupAreas()
-    {
-        // Return "*" for now. This means that the courier can service all areas.
-        // This can be part of the party metadata.
-        return '*';
-    }
-
-    /**
-     * Returns an array of delivery areas.
-     */
-    public function getDeliveryAreas()
-    {
-        // Return "*" for now. This means that the courier can service all areas.
-        // This can be part of the party metadata.
-        return '*';
     }
 
     /**

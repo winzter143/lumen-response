@@ -84,11 +84,9 @@ CREATE TABLE core.users
 --
 -- Table structure for table organizations
 --
-CREATE TYPE core.organization_type AS ENUM ('company', 'merchant', 'courier');
 CREATE TABLE core.organizations
 (
   party_id SERIAL,
-  type core.organization_type NOT NULL,
   name VARCHAR(255) NOT NULL,
   PRIMARY KEY (party_id),
   CONSTRAINT organizations_name_name_uk UNIQUE (name),
@@ -100,7 +98,7 @@ CREATE INDEX organizations_name_fts_idx ON core.organizations USING gin(to_tsvec
 --
 -- Table structure for table relationships
 --
-CREATE TYPE core.relationship_type AS ENUM ('employee_of', 'friend_of');
+CREATE TYPE core.relationship_type AS ENUM ('employee_of', 'friend_of', 'department_of');
 CREATE TABLE core.relationships (
   id SERIAL,
   from_party_id INT NOT NULL,
