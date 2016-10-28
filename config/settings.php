@@ -68,12 +68,14 @@ return [
         'for_pickup' => 'Ready for pickup',
         'picked_up' => 'Picked up',
         'failed_pickup' => 'Failed pickup',
-        'in_transit' => 'Out for delivery',
+        'failed_delivery' => 'Failed delivery',
+        'in_transit' => 'In tansit',
         'claimed' => 'Claimed',
         'delivered' => 'Delivered',
         'return_in_transit' => 'Returned - in transit',
         'returned' => 'Returned',
-        'failed_return' => 'Failed return'
+        'failed_return' => 'Failed return',
+        'out_for_delivery' => 'Out for delivery',
     ],
     // List of payment methods and their display names.
     'payment_methods' => [
