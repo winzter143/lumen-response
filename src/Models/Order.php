@@ -67,6 +67,14 @@ class Order extends Model
     }
 
     /**
+     * An order has a currency.
+     */
+    public function currency()
+    {
+        return $this->hasOne('F3\Models\Currency', 'id', 'currency_id');
+    }
+
+    /**
      * Returns the next ID in the sequence.
      */
     public static function getNextId()
@@ -358,7 +366,7 @@ class Order extends Model
     /**
      * Sets the the order status.
      */
-    public function setStatus($status, $remarks = null)
+    public function setStatus($status, $remarks = null, $update_tat = true)
     {
         try {
             // Check if the current status is the same as the new one.
@@ -369,16 +377,14 @@ class Order extends Model
             // Start the transaction.
             DB::beginTransaction();
 
-            // Update the turnaround time.
-            $tat = json_decode($this->tat, true);
-            $tat[$status] = date('r');
-            $tat = json_encode($tat);
-            $this->tat = $tat;
-
             // Update the order status.
             $this->status = $status;
             $this->status_updated_at = DB::raw('now()');
             $this->save();
+
+            if ($update_tat) {
+                $this->updateTat($status);
+            }
 
             // Create an order event.
             $this->addEvent($status, $remarks);
@@ -394,6 +400,19 @@ class Order extends Model
     }
 
     /**
+     * Sets the order turnaround time for the given status.
+     */
+    public function updateTat($status, $date = null)
+    {
+        // Update the turnaround time.
+        $tat = json_decode($this->tat, true);
+        $tat[$status] = ($date) ? date('r', strtotime($date)) : date('r');
+        $tat = json_encode($tat);
+        $this->tat = $tat;
+        return $this->save();
+    }
+
+    /**
      * Updates the order status to "picked_up" and sets the pickup date.
      */
     public function pickedUp($pickup_date, $remarks = null)
@@ -403,7 +422,10 @@ class Order extends Model
             DB::beginTransaction();
 
             // Set the status.
-            $this->setStatus('picked_up', $remarks);
+            $this->setStatus('picked_up', $remarks, false);
+
+            // Set the TAT.
+            $this->updateTat('picked_up', $pickup_date);
 
             // Look for the next segment.
             $next_segment = DB::table('consumer.order_segments')->where([['order_id', $this->id], ['id', '>', $this->active_segment_id]])->limit(1)->first();
@@ -496,6 +518,14 @@ class Order extends Model
     }
 
     /**
+     * Sets the order status to "failed_delivery".
+     */
+    public function failedDelivery($remarks = null)
+    {
+        return $this->setStatus('failed_delivery', $remarks);
+    }
+
+    /**
      * Sets the order status to "claimed".
      */
     public function claimed($remarks = null)
@@ -504,9 +534,17 @@ class Order extends Model
     }
 
     /**
+     * Sets the order status to "out_for_delivery".
+     */
+    public function outForDelivery($remarks = null)
+    {
+        return $this->setStatus('out_for_delivery', $remarks);
+    }
+
+    /**
      * Sets the order status to "delivered".
      */
-    public function delivered($remarks = null)
+    public function delivered($remarks = null, $ip_address = null)
     {
         try {
             // Start the transaction.
@@ -514,6 +552,11 @@ class Order extends Model
 
             // Set the status.
             $this->setStatus('delivered', $remarks);
+
+            // Transfer the shipping fee, insurance fee, and transaction fee from the client's fund wallet to the system's sales wallet.
+            $amount = $this->shipping_fee + $this->insurance_fee + $this->transaction_fee;
+            $details = 'Sales for order #' . $this->tracking_number;
+            Wallet::transfer($this->party_id, config('settings.system_party_id'), 'fund', 'sales', $this->currency->code, $amount, 'transfer', $details, $this->id, $ip_address);
 
             // Set the charge status to "paid" if it's a COD order.
             if ($this->payment_method == 'cod') {
@@ -530,6 +573,10 @@ class Order extends Model
                 // Pass the order total for now.
                 // $charge->paid($tendered_amount, $change_amount = 0, $remarks = null);
                 $charge->paid($this->grand_total, 0, null);
+
+                // Fund the client's wallet by transferring the total order amount from the system's collection wallet to the client's fund wallet.
+                $details = 'Funds for COD order #' . $this->tracking_number;
+                Wallet::transfer(config('settings.system_party_id'), $this->party_id, 'collections', 'fund', $this->currency->code, $this->grand_total, 'transfer', $details, $this->id, $ip_address);
             }
 
             // Commit.
