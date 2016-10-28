@@ -37,8 +37,8 @@ class Wallet extends Model
                 'party_id' => 'integer|required|exists:pgsql.core.parties,id',
                 'type' => 'string|required|in:' . implode(',', self::TYPES),
                 'currency_id' => 'integer|required|exists:pgsql.core.currencies,id',
-                'max_limit' => 'numeric|required|min:0|max:999999999999.99',
-                'credit_limit' => 'numeric|required|min:-999999999999.99|max:0',
+                'max_limit' => 'numeric|nullable|min:0|max:999999999999.99',
+                'credit_limit' => 'numeric|nullable|min:-999999999999.99|max:0',
                 ];
     }
 
