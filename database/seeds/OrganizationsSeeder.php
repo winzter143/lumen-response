@@ -14,6 +14,21 @@ class OrganizationsSeeder extends Seeder
         'metadata' => [
             'priority' => 1,
             'barcode_format' => 'qr',
+        ],
+        'wallets' => [
+            'sales' => [
+                'currency' => 'PHP',
+                'amount' => 0,
+                'credit_limit' => 0,
+                'max_limit' => null
+            ],
+            'collections' => [
+                'currency' => 'PHP',
+                'amount' => 0,
+                // TODO: Determine the correct credit limit.
+                'credit_limit' => null,
+                'max_limit' => null
+            ]
         ]
     ], [
         'name' => 'LBC',
@@ -25,23 +40,93 @@ class OrganizationsSeeder extends Seeder
     ], [
         'name' => 'Shopee',
         'role' => 'client',
-        'metadata' => null
+        'metadata' => null,
+        'wallets' => [
+            'fund' => [
+                'currency' => 'PHP',
+                'amount' => 0,
+                'credit_limit' => 0,
+                'max_limit' => null
+            ],
+            'settlement' => [
+                'currency' => 'PHP',
+                'amount' => 0,
+                'credit_limit' => 0,
+                'max_limit' => null
+            ]
+        ]
     ], [
         'name' => 'Lazada',
         'role' => 'client',
-        'metadata' => null
+        'metadata' => null,
+        'wallets' => [
+            'fund' => [
+                'currency' => 'PHP',
+                'amount' => 0,
+                'credit_limit' => 0,
+                'max_limit' => null
+            ],
+            'settlement' => [
+                'currency' => 'PHP',
+                'amount' => 0,
+                'credit_limit' => 0,
+                'max_limit' => null
+            ]
+        ]
     ], [
         'name' => 'CMO',
         'role' => 'client',
-        'metadata' => null
+        'metadata' => null,
+        'wallets' => [
+            'fund' => [
+                'currency' => 'PHP',
+                'amount' => 0,
+                'credit_limit' => 0,
+                'max_limit' => null
+            ],
+            'settlement' => [
+                'currency' => 'PHP',
+                'amount' => 0,
+                'credit_limit' => 0,
+                'max_limit' => null
+            ]
+        ]
     ], [
         'name' => 'Shipping Cart',
         'role' => 'client',
-        'metadata' => null
+        'metadata' => null,
+        'wallets' => [
+            'fund' => [
+                'currency' => 'PHP',
+                'amount' => 0,
+                'credit_limit' => 0,
+                'max_limit' => null
+            ],
+            'settlement' => [
+                'currency' => 'PHP',
+                'amount' => 0,
+                'credit_limit' => 0,
+                'max_limit' => null
+            ]
+        ]
     ], [
         'name' => 'i4 Asia',
         'role' => 'client',
-        'metadata' => null
+        'metadata' => null,
+        'wallets' => [
+            'fund' => [
+                'currency' => 'PHP',
+                'amount' => 0,
+                'credit_limit' => 0,
+                'max_limit' => null
+            ],
+            'settlement' => [
+                'currency' => 'PHP',
+                'amount' => 0,
+                'credit_limit' => 0,
+                'max_limit' => null
+            ]
+        ]
     ], [
         'name' => 'LBCX North Hub',
         'role' => 'hub',
@@ -195,6 +280,33 @@ class OrganizationsSeeder extends Seeder
 
                         // Create the relationship.
                         DB::table('core.relationships')->updateOrInsert(['from_party_id' => $party_id, 'type' => $type, 'to_party_id' => $to_party_id], ['from_party_id' => $party_id, 'type' => $type, 'to_party_id' => $to_party_id]);
+                    }
+                }
+
+                // Create the wallets.
+                if (isset($org['wallets'])) {
+                    foreach ($org['wallets'] as $type => $wallet) {
+                        // Get the currency ID.
+                        $currency_id = DB::table('core.currencies')->where('code', $wallet['currency'])->value('id');
+
+                        if (!$currency_id) {
+                            throw new \Exception('Currency "' . $wallet['currency'] . '"" does not exist.');
+                        }
+
+                        // Check if the wallet exists.
+                        $result = DB::table('wallet.wallets')->where([['party_id', $party_id], ['type', $type]])->first();
+
+                        // Create the wallet if it doesn't exist.
+                        if (!$result) {
+                            unset($wallet['currency']);
+                            DB::table('wallet.wallets')->insert(array_merge($wallet, [
+                                'type' => $type,
+                                'party_id' => $party_id,
+                                'currency_id' => $currency_id,
+                                'status' => 1,
+                                'created_at' => DB::raw('now()')
+                            ]));
+                        }
                     }
                 }
             }
