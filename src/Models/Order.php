@@ -600,17 +600,75 @@ class Order extends Model
     /**
      * Sets the order status to "returned".
      */
-    public function returned($remarks = null)
+    public function returned($remarks = null, $ip_address = null)
     {
-        return $this->setStatus('returned', $remarks);
+        try {
+            // Start the transaction.
+            DB::beginTransaction();
+
+            // Update the order status.
+            $this->setStatus('returned', $remarks);
+
+            // Don't transfer the transaction fee for returned COD orders.
+            if ($this->payment_method == 'cod') {
+                $amount = $this->shipping_fee + $this->insurance_fee;
+            } else {
+                $amount = $this->shipping_fee + $this->insurance_fee + $this->transaction_fee;
+            }
+
+            $details = 'Sales for order #' . $this->tracking_number;
+            Wallet::transfer($this->party_id, config('settings.system_party_id'), 'fund', 'sales', $this->currency->code, $amount, 'transfer', $details, $this->id, $ip_address);
+
+            // Fund the client's wallet by transferring the total order amount from the system's collection wallet to the client's fund wallet.
+            $details = 'Funds for COD order #' . $this->tracking_number;
+            Wallet::transfer(config('settings.system_party_id'), $this->party_id, 'collections', 'fund', $this->currency->code, $this->grand_total, 'transfer', $details, $this->id, $ip_address);
+
+            // Commit.
+            DB::commit();
+            return $this;
+
+        } catch (\Exception $e) {
+            // Rollback and return the error.
+            DB::rollback();
+            throw $e;
+        }
     }
 
     /**
      * Sets the order status to "failed_return".
      */
-    public function failedReturn($remarks = null)
+    public function failedReturn($remarks = null, $ip_address = null)
     {
-        return $this->setStatus('failed_return', $remarks);
+        try {
+            // Start the transaction.
+            DB::beginTransaction();
+
+            // Update the order status.
+            $this->setStatus('failed_return', $remarks);
+
+            // Don't transfer the transaction fee for returned COD orders.
+            if ($this->payment_method == 'cod') {
+                $amount = $this->shipping_fee + $this->insurance_fee;
+            } else {
+                $amount = $this->shipping_fee + $this->insurance_fee + $this->transaction_fee;
+            }
+
+            $details = 'Sales for order #' . $this->tracking_number;
+            Wallet::transfer($this->party_id, config('settings.system_party_id'), 'fund', 'sales', $this->currency->code, $amount, 'transfer', $details, $this->id, $ip_address);
+
+            // Fund the client's wallet by transferring the total order amount from the system's collection wallet to the client's fund wallet.
+            $details = 'Funds for COD order #' . $this->tracking_number;
+            Wallet::transfer(config('settings.system_party_id'), $this->party_id, 'collections', 'fund', $this->currency->code, $this->grand_total, 'transfer', $details, $this->id, $ip_address);
+
+            // Commit.
+            DB::commit();
+            return $this;
+            
+        } catch (\Exception $e) {
+            // Rollback and return the error.
+            DB::rollback();
+            throw $e;
+        }
     }
 
     /**
