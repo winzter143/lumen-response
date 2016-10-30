@@ -24,6 +24,14 @@ class Claim extends Model
     protected $primaryKey = 'order_id';
 
     /**
+     * A claim belongs to an order.
+     */
+    public function order()
+    {
+        return $this->belongsTo('F3\Models\Order');
+    }
+
+    /**
      * Returns the model validation rules.
      */
     public function getRules()
@@ -122,5 +130,87 @@ class Claim extends Model
             DB::rollback();
             throw $e;
         }
+    }
+
+    /**
+     * Sets the the claim status.
+     */
+    public function setStatus($status)
+    {
+        // Check if the current status is the same as the new one.
+        if ($this->status == $status) {
+            return $this;
+        }
+
+        // Update the order status.
+        $this->status = $status;
+        $this->save();
+
+        return $this;
+    }
+
+    /**
+     * Sets the claim status to "pending".
+     */
+    public function pending()
+    {
+        return $this->setStatus('pending');
+    }
+
+    /**
+     * Sets the claim status to "verified".
+     */
+    public function verified($ip_address = null)
+    {
+        try {
+            // Start the transaction.
+            DB::beginTransaction();
+
+            // Update the status.
+            $this->setStatus('verified');
+
+            // Determine the amount to be transferred back to the client.
+            $amount = $this->amount;
+
+            if ($this->shipping_fee_flag) {
+                $amount += $this->order->shipping_fee;
+            }
+
+            if ($this->insurance_fee_flag) {
+                $amount += $this->order->insurance_fee;
+            }
+
+            if ($this->transaction_fee_flag) {
+                $amount += $this->order->transaction_fee;
+            }
+
+            // Transfer the claim amount, shipping, insurance, and transaction fees from the system's sales wallet to the client's fund wallet.
+            $details = 'Claim for order #' . $this->order->tracking_number;
+            Wallet::transfer(config('settings.system_party_id'), $this->order->party_id, 'sales', 'fund', $this->order->currency->code, $amount, 'transfer', $details, $this->order_id, $ip_address);
+
+            // Commit.
+            DB::commit();
+            return $this;
+        } catch (\Exception $e) {
+            // Rollback and return the error.
+            DB::rollback();
+            throw $e;
+        }
+    }
+
+    /**
+     * Sets the claim status to "settled".
+     */
+    public function settled()
+    {
+        return $this->setStatus('settled');
+    }
+
+    /**
+     * Sets the claim status to "declined".
+     */
+    public function declined()
+    {
+        return $this->setStatus('declined');
     }
 }

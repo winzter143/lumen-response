@@ -67,6 +67,14 @@ class Order extends Model
     }
 
     /**
+     * An order has a claim.
+     */
+    public function claim()
+    {
+        return $this->hasOne('F3\Models\Claim');
+    }
+
+    /**
      * An order has a currency.
      */
     public function currency()
@@ -674,7 +682,7 @@ class Order extends Model
     /**
      * Claims an order.
      */
-    public function claim($amount, $reason, $documentary_proof_url = null, $shipping_fee_flag = 0, $insurance_fee_flag = 0, $transaction_fee_flag = 0, $status = 'pending')
+    public function claimOrder($amount, $reason, $documentary_proof_url = null, $shipping_fee_flag = 0, $insurance_fee_flag = 0, $transaction_fee_flag = 0, $status = 'pending')
     {
         return Claim::store($this->id, $amount, $reason, $documentary_proof_url, $shipping_fee_flag, $insurance_fee_flag, $transaction_fee_flag, $status);
     }
