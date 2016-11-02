@@ -617,19 +617,11 @@ class Order extends Model
             // Update the order status.
             $this->setStatus('returned', $remarks);
 
-            // Don't transfer the transaction fee for returned COD orders.
-            if ($this->payment_method == 'cod') {
-                $amount = $this->shipping_fee + $this->insurance_fee;
-            } else {
-                $amount = $this->shipping_fee + $this->insurance_fee + $this->transaction_fee;
-            }
-
-            $details = 'Sales for order #' . $this->tracking_number;
+            // Transfer the funds from the client's fund wallet to the system's sales wallet.
+            // We transfer twice the shipping fee plus insurance fee.
+            $details = 'Return for order #' . $this->tracking_number;
+            $amount = ($this->shipping_fee * 2) + $this->insurance_fee;
             Wallet::transfer($this->party_id, config('settings.system_party_id'), 'fund', 'sales', $this->currency->code, $amount, 'transfer', $details, $this->id, $ip_address);
-
-            // Fund the client's wallet by transferring the total order amount from the system's collection wallet to the client's fund wallet.
-            $details = 'Funds for COD order #' . $this->tracking_number;
-            Wallet::transfer(config('settings.system_party_id'), $this->party_id, 'collections', 'fund', $this->currency->code, $this->grand_total, 'transfer', $details, $this->id, $ip_address);
 
             // Commit.
             DB::commit();
@@ -654,20 +646,12 @@ class Order extends Model
             // Update the order status.
             $this->setStatus('failed_return', $remarks);
 
-            // Don't transfer the transaction fee for returned COD orders.
-            if ($this->payment_method == 'cod') {
-                $amount = $this->shipping_fee + $this->insurance_fee;
-            } else {
-                $amount = $this->shipping_fee + $this->insurance_fee + $this->transaction_fee;
-            }
-
-            $details = 'Sales for order #' . $this->tracking_number;
+            // Transfer the funds from the client's fund wallet to the system's sales wallet.
+            // We transfer twice the shipping fee plus insurance fee.
+            $details = 'Return for order #' . $this->tracking_number;
+            $amount = ($this->shipping_fee * 2) + $this->insurance_fee;
             Wallet::transfer($this->party_id, config('settings.system_party_id'), 'fund', 'sales', $this->currency->code, $amount, 'transfer', $details, $this->id, $ip_address);
-
-            // Fund the client's wallet by transferring the total order amount from the system's collection wallet to the client's fund wallet.
-            $details = 'Funds for COD order #' . $this->tracking_number;
-            Wallet::transfer(config('settings.system_party_id'), $this->party_id, 'collections', 'fund', $this->currency->code, $this->grand_total, 'transfer', $details, $this->id, $ip_address);
-
+            
             // Commit.
             DB::commit();
             return $this;
