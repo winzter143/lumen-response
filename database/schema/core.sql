@@ -92,7 +92,6 @@ CREATE TABLE core.organizations
   CONSTRAINT organizations_name_name_uk UNIQUE (name),
   CONSTRAINT organizations_party_id_fk FOREIGN KEY (party_id) REFERENCES core.parties (id) ON DELETE NO ACTION ON UPDATE NO ACTION
 );
-CREATE INDEX organizations_type_idx ON core.organizations (type);
 CREATE INDEX organizations_name_fts_idx ON core.organizations USING gin(to_tsvector('english', name));
 
 --
