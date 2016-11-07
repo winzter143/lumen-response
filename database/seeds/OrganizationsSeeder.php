@@ -1,7 +1,7 @@
 <?php
 use Illuminate\Database\Seeder;
-use F3\models\Address;
-use F3\components\Model;
+use F3\Models\Address;
+use F3\Components\Model;
 
 class OrganizationsSeeder extends Seeder
 {
