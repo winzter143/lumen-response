@@ -235,17 +235,15 @@ class OrganizationsSeeder extends Seeder
                 ]);
 
                 // Create the organization keys.
-                if ($org['role'] == 'client') {
-                    $result = DB::table('core.api_keys')->where('party_id', $party_id)->get();
+                $result = DB::table('core.api_keys')->where('party_id', $party_id)->get();
 
-                    if (!$result->toArray()) {
-                        for ($i = 0; $i < 3; $i++) {
-                            // Generate a key.
-                            $key = __generate_api_key($party_id);
+                if (!$result->toArray()) {
+                    for ($i = 0; $i < 3; $i++) {
+                        // Generate a key.
+                        $key = __generate_api_key($party_id);
 
-                            // Create the keys.
-                            DB::table('core.api_keys')->updateOrInsert(['party_id' => $party_id, 'api_key' => $key['api_key'], 'secret_key' => $key['secret_key'], 'created_at' => 'now()', 'expires_at' => $key['expires_at']]);
-                        }
+                        // Create the keys.
+                        DB::table('core.api_keys')->updateOrInsert(['party_id' => $party_id, 'api_key' => $key['api_key'], 'secret_key' => $key['secret_key'], 'created_at' => 'now()', 'expires_at' => $key['expires_at']]);
                     }
                 }
 

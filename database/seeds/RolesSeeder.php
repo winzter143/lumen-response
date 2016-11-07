@@ -25,17 +25,17 @@ class RolesSeeder extends Seeder
         'client' => [
             'name' => 'client',
             'display_name' => 'Client System',
-            'permissions' => ['create-order'],
+            'permissions' => ['create-order', 'view-own-orders', 'view-own-order', 'edit-own-order'],
         ],
         'courier' => [
             'name' => 'courier',
             'display_name' => 'Courier',
-            'permissions' => [],
+            'permissions' => ['view-orders', 'view-order', 'edit-order'],
         ],
         'hub' => [
             'name' => 'hub',
             'display_name' => 'hub',
-            'permissions' => [],
+            'permissions' => ['view-orders', 'view-order', 'edit-order'],
         ]
     ];
 
