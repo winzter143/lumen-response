@@ -57,7 +57,7 @@ abstract class Courier
      */
     protected static function classKey($name)
     {
-        return strtolower(str_replace(' ', '_', $name));
+        return str_replace(' ', '', ucwords($name));
     }
 
     /**
