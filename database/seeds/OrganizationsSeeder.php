@@ -56,7 +56,7 @@ class OrganizationsSeeder extends Seeder
             ]
         ]
     ], [
-        'name' => 'Lazada',
+        'name' => 'LBCX Test Merchant',
         'role' => 'client',
         'metadata' => null,
         'wallets' => [
@@ -238,12 +238,12 @@ class OrganizationsSeeder extends Seeder
                 $result = DB::table('core.api_keys')->where('party_id', $party_id)->get();
 
                 if (!$result->toArray()) {
-                    for ($i = 0; $i < 3; $i++) {
+                    foreach (['dev', 'staging', 'production'] as $env) {
                         // Generate a key.
                         $key = __generate_api_key($party_id);
 
                         // Create the keys.
-                        DB::table('core.api_keys')->updateOrInsert(['party_id' => $party_id, 'api_key' => $key['api_key'], 'secret_key' => $key['secret_key'], 'created_at' => 'now()', 'expires_at' => $key['expires_at']]);
+                        DB::table('core.api_keys')->insert(['party_id' => $party_id, 'name' => $env, 'api_key' => $key['api_key'], 'secret_key' => $key['secret_key'], 'created_at' => 'now()', 'expires_at' => $key['expires_at']]);
                     }
                 }
 
