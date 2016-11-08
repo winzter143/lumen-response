@@ -1,0 +1,83 @@
+<div class=awb>
+    <header><img src=https://s3-us-west-1.amazonaws.com/assets.lbcx.ph/awb/images/lbcx.jpg>
+        <div class=right>
+            <h1 class={cod_class}>COD</h1>
+        </div>
+    </header>
+    <div class=content-wrapper>
+        <h2>From:</h2>
+        <div class=from-info-table>
+            <table class=table>
+                <tr>
+                    <td>Full Name</td>
+                    <td>{seller_name}</td>
+                </tr>
+                <tr>
+                    <td>Address</td>
+                    <td class="capitalize">{seller_address}</td>
+                </tr>
+                <tr>
+                    <td>City</td>
+                    <td class="uppercase">{seller_city}</td>
+                </tr>
+                <tr>
+                    <td>Contact#</td>
+                    <td>{seller_contact_number}</td>
+                </tr>
+            </table>
+        </div>
+        <h2>To:</h2>
+        <div class=to-info-table>
+            <table class=table>
+                <tr>
+                    <td>Full Name</td>
+                    <td class="capitalize" colspan=3>{buyer_name}</td>
+                </tr>
+                <tr>
+                    <td>Address</td>
+                    <td class="capitalize" colspan=3>{buyer_address}</td>
+                </tr>
+                <tr>
+                    <td>Province</td>
+                    <td class="uppercase">{buyer_state}</td>
+                    <td class="area uppercase" rowspan="2"><b>{buyer_area}</b></td>
+                </tr>
+                <tr>
+                    <td>City</td>
+                    <td class="uppercase">{buyer_city}</td>
+                </tr>
+                <tr>
+                    <td>Contact#</td>
+                    <td colspan=3>{buyer_contact_number}</td>
+                </tr>
+            </table>
+        </div>
+        <h2>Details:</h2>
+        <div class=items-info-table>
+            <table class=table>
+                <tr>
+                    <td>Quantity</td>
+                    <td>{quantity}</td>
+                    <td class="cod-fee" rowspan=2><b>Collectible Amt. ₱{cod_fee}</b></td>
+                    <tr>
+                        <td>Origin</td>
+                        <td  class="uppercase">{origin}</td>
+                    </tr>
+                    <tr>
+                        <td>Client</td>
+                        <td colspan=3>{client}</td>
+                    </tr>
+                    <tr>
+                        <td>Ref. No.</td>
+                        <td colspan=3>{reference_no}</td>
+                    </tr>
+            </table>
+            <div class=leopard>
+                <div class=oned>{partner_barcode}
+                    <p id="tracking-num">{partner_tracking_number}</p>
+                    <p id="txn-date">Txn Date : {txn_date}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

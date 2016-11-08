@@ -98,4 +98,18 @@ return [
         'code_128' => 'C128',
         'qr' => 'QRCODE',
     ],
+    'pdf' => array(
+        'enabled' => true,
+        'binary'  => '/usr/local/bin/wkhtmltopdf --print-media-type --lowquality',
+        'timeout' => false,
+        'options' => array('margin-top'=> '3mm', 'margin-right'=> '0mm', 'margin-bottom'=> '0mm', 'margin-left'=> '3mm'),
+        'env'     => array(),
+    ),
+    'image' => array(
+        'enabled' => true,
+        'binary'  => '/usr/local/bin/wkhtmltoimage',
+        'timeout' => false,
+        'options' => array(),
+        'env'     => array(),
+    ),
 ];

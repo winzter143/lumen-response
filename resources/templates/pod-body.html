@@ -1,0 +1,108 @@
+<div class=pod>
+    <div class=top>
+        <div>
+            <header><img src=http://rightbrainerdesign.com/images/lbcx-logo.jpg>
+                <h4 class=title>PROOF OF DELIVERY</h4>
+                <h2 class={cod_class}>COD</h2></header>
+            <div class=consignee-details>
+                <table class=consignee-table>
+                    <tr>
+                        <td>CONSIGNEE</td>
+                        <td>:</td>
+                        <td class="capitalize">{buyer_name}</td>
+                    </tr>
+                    <tr>
+                        <td>ADDRESS</td>
+                        <td>:</td>
+                        <td class="capitalize" colspan="2">{buyer_address}</td>
+                    </tr>
+                    <tr>
+                        <td>PROVINCE</td>
+                        <td>:</td>
+                        <td class="l-area uppercase">{buyer_state}</td>
+                        <td class="area uppercase" rowspan="2">{buyer_area}</td>
+                    </tr>
+                    <tr>
+                        <td>CITY</td>
+                        <td>:</td>
+                        <td class="uppercase">{buyer_city}</td>
+                    </tr>
+                    <tr>
+                        <td>TEL NO</td>
+                        <td>:</td>
+                        <td>{buyer_contact_number}</td>
+            </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class=shipper-details>
+        <div class=shipper>
+            <table class=shipper-table>
+                <tr>
+                    <td>SHIPPER</td>
+                    <td>:</td>
+                    <td class="capitalize">{seller_name}</td>
+                </tr>
+                <tr>
+                    <td>ADDRESS</td>
+                    <td>:</td>
+                    <td class="capitalize">{seller_address}</td>
+                </tr>
+                <tr>
+                    <td>CITY</td>
+                    <td>:</td>
+                    <td class="uppercase">{seller_city}</td>
+                </tr>
+                <tr>
+                    <td>TEL NO</td>
+                    <td>:</td>
+                    <td>{seller_contact_number}</td>
+                </tr>
+            </table>
+        </div>
+        <div class=origin>
+            <table class=origin-table>
+                <tr>
+                    <td>ORIGIN</td>
+                    <td>:</td>
+                    <td class="uppercase">{origin}</td>
+                </tr>
+                <tr>
+                    <td>QUANTITY</td>
+                    <td>:</td>
+                    <td>{quantity}</td>
+                </tr>
+                <tr>
+                    <td>COLLECTIBLE AMT.</td>
+                    <td>:</td>
+                    <td><b>COD {cod_fee}</b></td>
+                </tr>
+                <tr>
+                    <td>CLIENT</td>
+                    <td>:</td>
+                    <td>{client}</td>
+                </tr>
+                <tr>
+                    <td>REFERENCE NO.</td>
+                    <td>:</td>
+                    <td>{reference_no}</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+    <div class=footer>
+        <div class=signature>
+            <div class=consignee-sig>
+                <p class=consignee-sig-sig>CONSIGNEE'S NAME AND SIGNATURE <span>DATE</span></div>
+            <div class=courier-sig>
+                <p class=courier-sig-sig>COURIER'S NAME AND SIGNATURE <span>DATE</span></div>
+        </div>
+        <div class=br>
+            <div class=oned>{partner_barcode}
+                <p id="tracking-num">{partner_tracking_number}</p>
+                <p id="txn-date">TXN DATE : {txn_date}</p>
+        </div>
+        </div>
+    </div>
+</div>
