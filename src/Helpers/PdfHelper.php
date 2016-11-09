@@ -1,17 +1,16 @@
 <?php
 
-namespace App\Helpers;
+namespace F3\Helpers;
 
 use F3\Models\Address;
-use App\Http\Controllers\Controller;
 use DNS1D;
-use App\Jobs\PdfBuilder;
-use App\Jobs\PdfMerger;
+use F3\Jobs\PdfBuilder;
+use F3\Jobs\PdfMerger;
 use Storage;
 use Illuminate\Support\Facades\Log;
 use PDF;
 
-class PdfHelper extends Controller
+class PdfHelper
 {	    
 
     public function buildPdf($orders,$batch=false)
@@ -28,7 +27,7 @@ class PdfHelper extends Controller
     private function buildOne($order)
     {
         $now = date_format(new \DateTime(),"YmdHis");
-        $resDir = dirname(__DIR__,2) . '/resources/pdf/';
+        $resDir = dirname(__DIR__) . '/../resources/pdf/';
         
         // Build order sticker
         $awb = $this->buildAwb($order);
@@ -58,7 +57,7 @@ class PdfHelper extends Controller
     public function buildBatch($filters)
     {           
         $now = date_format(new \DateTime(),"YmdHis");
-        $resDir = dirname(__DIR__,2) . '/resources/pdf/';
+        $resDir = dirname(__DIR__) . '/../resources/pdf/';
 
         // Create temporary file
         file_put_contents($resDir . "awb-$now.pdf", '');
@@ -82,7 +81,7 @@ class PdfHelper extends Controller
     **/
     public function buildAwb($order)
 	{	
-		$template = file_get_contents( dirname(__DIR__,2) . '/resources/templates/awb-body.html' );
+		$template = file_get_contents( dirname(__DIR__) . '/../resources/templates/awb-body.html' );
 
 		// Generate the partner barcode (1D).
         $barcode = DNS1D::getBarcodeHTML($order['tracking_number'], 'C128', 2, 60);
@@ -149,7 +148,7 @@ class PdfHelper extends Controller
     **/
 	public function buildPod($order)
 	{	
-		$template = file_get_contents( dirname(__DIR__,2) . '/resources/templates/pod-body.html' );
+		$template = file_get_contents( dirname(__DIR__) . '/../resources/templates/pod-body.html' );
 
 		// Generate the partner barcode (1D).
         $barcode = DNS1D::getBarcodeHTML($order['tracking_number'], 'C128', 2, 70);
@@ -241,7 +240,7 @@ class PdfHelper extends Controller
         $awbs = implode('', $awbs);
         $pods = implode('', $pods);
 
-        $dir = dirname(__DIR__,2) . '/resources/tmp/';
+        $dir = dirname(__DIR__) . '/../resources/tmp/';
 
         $htmls = $this->prepareHtml($awbs, $pods);
 
@@ -253,11 +252,11 @@ class PdfHelper extends Controller
     public function prepareHtml($awbs, $pods)
     {
         //Add awb view styles
-        $styles = file_get_contents( dirname(__DIR__,2) . '/resources/templates/awb-style.html');
+        $styles = file_get_contents( dirname(__DIR__) . '/../resources/templates/awb-style.html');
         $awbs =  $styles . $awbs . '</body></html>';
 
         //Add pod view styles
-        $styles = file_get_contents( dirname(__DIR__,2) . '/resources/templates/pod-style.html');
+        $styles = file_get_contents( dirname(__DIR__) . '/../resources/templates/pod-style.html');
         $pods =  $styles . $pods . '</body></html>';
 
         return ['awb' => $awbs, 'pod' => $pods];

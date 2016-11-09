@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Jobs;
+namespace F3\Jobs;
 
 use Illuminate\Bus\Queueable;
 use Illuminate\Queue\SerializesModels;
@@ -8,8 +8,8 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
-use App\Helpers\PdfHelper;
-use App\Jobs\PdfMerger;
+use F3\Helpers\PdfHelper;
+use F3\Jobs\PdfMerger;
 use PDF;
 use F3\Components\JWT;
 use GuzzleHttp\Exception\GuzzleException;
