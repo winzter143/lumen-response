@@ -20,7 +20,11 @@ class CoreServiceProvider extends ServiceProvider
      */
     public function boot()
     {
+        // Register additional aliases.
+        class_alias(\Barryvdh\Snappy\Facades\SnappyPdf::class, 'PDF');
+        class_alias(\Barryvdh\Snappy\Facades\SnappyImage::class, 'SnappyImage');
 
+        // Register additional service providers.
+        $this->app->register(\Barryvdh\Snappy\LumenServiceProvider::class);
     }
-
 }
