@@ -43,21 +43,21 @@ class PdfMerger implements ShouldQueue
         Log::info("Merging stickers");
         $pdf = new \LynX39\LaraPdfMerger\PdfManage;
 
-        if((new \FilesystemIterator(dirname(__DIR__,2) . '/resources/tmp'))->valid()) { 
-            foreach (new \FilesystemIterator(dirname(__DIR__,2) . '/resources/tmp', \FilesystemIterator::SKIP_DOTS) as $file) {
+        if((new \FilesystemIterator(dirname(dirname(__DIR__)) . '/resources/tmp'))->valid()) { 
+            foreach (new \FilesystemIterator(dirname(dirname(__DIR__)) . '/resources/tmp', \FilesystemIterator::SKIP_DOTS) as $file) {
                 if ($file->isFile() && (strpos( $file->getFilename() , $type.'-'.$this->fileKey ) !== false) ) {
                     Log::info($file->getFilename());
-                    $pdf->addPdf(dirname(__DIR__,2) . '/resources/tmp/'. $file->getFilename(), 'all');
+                    $pdf->addPdf(dirname(dirname(__DIR__)) . '/resources/tmp/'. $file->getFilename(), 'all');
                 }
             }
 
-            $resDir = dirname(__DIR__,2) . '/resources/pdf/';
+            $resDir = dirname(dirname(__DIR__)) . '/resources/pdf/';
 
             $pdf->merge('file', $resDir . "/$type-" . $this->now . '.pdf', $orientation);
             Log::info("Merged stickers");
 
             //Delete temp files
-            $mask = dirname(__DIR__,2) . "/resources/tmp/$type-" . $this->fileKey . '*.pdf';
+            $mask = dirname(dirname(__DIR__)) . "/resources/tmp/$type-" . $this->fileKey . '*.pdf';
             array_map('unlink',glob($mask));
 
             //Push file to S3

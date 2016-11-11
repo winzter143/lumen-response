@@ -28,7 +28,7 @@ class PdfHelper
     {
         $now = date_format(new \DateTime(),"YmdHis");
         $resDir = dirname(__DIR__) . '/../resources/pdf/';
-        
+
         // Build order sticker
         $awb = $this->buildAwb($order);
         $pod = $this->buildPod($order);
@@ -241,7 +241,6 @@ class PdfHelper
         $pods = implode('', $pods);
 
         $dir = dirname(__DIR__) . '/../resources/tmp/';
-
         $htmls = $this->prepareHtml($awbs, $pods);
 
         //Generate AWB and POD pdfs
