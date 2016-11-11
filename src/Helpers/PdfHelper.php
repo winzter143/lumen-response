@@ -27,7 +27,7 @@ class PdfHelper
     private function buildOne($order)
     {
         $now = date_format(new \DateTime(),"YmdHis");
-        $resDir = dirname(__DIR__) . '/../resources/pdf/';
+        $resDir = app()->basePath() . '/storage/pdf/';
 
         // Build order sticker
         $awb = $this->buildAwb($order);
@@ -57,7 +57,7 @@ class PdfHelper
     public function buildBatch($filters)
     {           
         $now = date_format(new \DateTime(),"YmdHis");
-        $resDir = dirname(__DIR__) . '/../resources/pdf/';
+        $resDir = app()->basePath() . '/storage/pdf/';
 
         // Create temporary file
         file_put_contents($resDir . "awb-$now.pdf", '');
