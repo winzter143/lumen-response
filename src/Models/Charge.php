@@ -38,6 +38,7 @@ class Charge extends Model
             'tendered_amount' => 'numeric|required|min:0|max:999999999999.99',
             'change_amount' => 'numeric|required|min:0|max:999999999999.99',
             'remarks' => 'string|nullable',
+            'reference_id' => 'string|nullable|max:100',
             'updated_by' => 'integer|nullable|exists:pgsql.core.users,party_id'
         ];
     }
