@@ -10,6 +10,7 @@ CREATE SEQUENCE consumer.lbc_tracking_number_seq START WITH 71001372089163;
 -- Table structure for table orders
 --
 CREATE TYPE consumer.order_status AS ENUM ('pending', 'for_pickup', 'picked_up', 'failed_pickup', 'in_transit', 'claimed', 'out_for_delivery', 'delivered', 'failed_delivery', 'return_in_transit', 'returned', 'failed_return');
+CREATE TYPE consumer.match_status AS ENUM ('match', 'over_remit', 'under_remit');
 CREATE TYPE consumer.payment_method AS ENUM ('credit_card', 'cod', 'otc', 'debit_card');
 CREATE TYPE consumer.payment_provider AS ENUM('asiapay', 'dragonpay', 'lbc', 'lbcx');
 CREATE TABLE consumer.orders
@@ -26,6 +27,7 @@ CREATE TABLE consumer.orders
   payment_method consumer.payment_method NOT NULL,
   payment_provider consumer.payment_provider NOT NULL,
   status consumer.order_status NOT NULL DEFAULT 'pending',
+  match_status consumer.order_status,
   buyer_name VARCHAR(100) NOT NULL,
   email VARCHAR(50),
   contact_number VARCHAR(50),
