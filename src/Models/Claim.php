@@ -16,7 +16,7 @@ class Claim extends Model
      * The attributes that are mass assignable.
      * @var array
      */
-    protected $fillable = ['order_id', 'status', 'reason', 'amount', 'shipping_fee_flag', 'insurance_fee_flag', 'transaction_fee_flag', 'assets', 'remarks', 'created_at', 'created_by', 'updated_at', 'updated_by', 'request_number', 'tat'];
+    protected $fillable = ['order_id', 'status', 'reason', 'amount', 'shipping_fee_flag', 'insurance_fee_flag', 'transaction_fee_flag', 'assets', 'remarks', 'created_at', 'created_by', 'updated_at', 'updated_by', 'request_number', 'tat', 'reference_id'];
 
     /**
      * The table's primary key.
@@ -39,7 +39,8 @@ class Claim extends Model
         // Set the validation rules.
         $rules = [
             'order_id' => 'integer|required|exists:pgsql.consumer.orders,id',
-            'request_number' => 'string|max:15',
+            'request_number' => 'string|required|max:15',
+            'reference_id' => 'string|nullable|max:100',
             'status' => 'string|in:pending,verified,settled,declined',
             'reason' => 'string|required',
             'amount' => 'numeric|required|min:0|max:999999999999.99',
@@ -64,9 +65,10 @@ class Claim extends Model
      * @param int $transaction_fee_flag Set to 1 to refund transaction fee, set to 0 otherwise
      * @param string $remarks Miscellaneous remarks
      * @param string $status Claim status
+     * @param string $reference_id Reference ID / credit memo #
      * @param array $created_by User details
      */
-    public static function store($order_id, $amount, $reason, $assets = null, $shipping_fee_flag = 0, $insurance_fee_flag = 0, $transaction_fee_flag = 0, $remarks = null, $status = 'pending', array $created_by = [])
+    public static function store($order_id, $amount, $reason, $assets = null, $shipping_fee_flag = 0, $insurance_fee_flag = 0, $transaction_fee_flag = 0, $remarks = null, $status = 'pending', $reference_id = null, array $created_by = [])
     {
         try {
             // Start the transaction.
@@ -118,6 +120,7 @@ class Claim extends Model
             $attributes = [
                 'order_id' => $order_id,
                 'request_number' => self::getRequestNumber($order_id),
+                'reference_id' => $reference_id,
                 'amount' => $amount,
                 'reason' => $reason,
                 'assets' => json_encode($assets),

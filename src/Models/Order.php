@@ -717,11 +717,12 @@ class Order extends Model
      * @param int $transaction_fee_flag Set to 1 to refund transaction fee, set to 0 otherwise
      * @param string $remarks Miscellaneous remarks
      * @param string $status Claim status
+     * @param string $reference_id Reference ID / credit memo #
      * @param array $created_by User details
      */
-    public function claimOrder($amount, $reason, $assets = null, $shipping_fee_flag = 0, $insurance_fee_flag = 0, $transaction_fee_flag = 0, $remarks = null, $status = 'pending', array $created_by = [])
+    public function claimOrder($amount, $reason, $assets = null, $shipping_fee_flag = 0, $insurance_fee_flag = 0, $transaction_fee_flag = 0, $remarks = null, $status = 'pending', $reference_id = null, array $created_by = [])
     {
-        return Claim::store($this->id, $amount, $reason, $assets, $shipping_fee_flag, $insurance_fee_flag, $transaction_fee_flag, $remarks, $status, $created_by);
+        return Claim::store($this->id, $amount, $reason, $assets, $shipping_fee_flag, $insurance_fee_flag, $transaction_fee_flag, $remarks, $status, $reference_id, $created_by);
     }
 
     /**

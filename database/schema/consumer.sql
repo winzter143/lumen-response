@@ -183,6 +183,7 @@ CREATE TABLE consumer.claims
 (
   order_id INT NOT NULL,
   request_number VARCHAR(15) NOT NULL,
+  reference_id VARCHAR(100),
   status consumer.claim_status NOT NULL DEFAULT 'pending',
   amount NUMERIC(14, 2) NOT NULL,
   shipping_fee_flag SMALLINT NOT NULL DEFAULT 0,
