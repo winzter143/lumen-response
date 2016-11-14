@@ -17,7 +17,7 @@ class Order extends Model
      * The attributes that are mass assignable.
      * @var array
      */
-    protected $fillable = ['id', 'party_id', 'currency_id', 'reference_id', 'pickup_address_id', 'delivery_address_id', 'tracking_number', 'payment_method', 'payment_provider', 'status', 'buyer_name', 'email', 'contact_number', 'subtotal', 'shipping', 'tax', 'fee', 'grand_total', 'metadata', 'ip_address', 'preferred_pickup_time', 'preferred_delivery_time', 'insurance', 'insurance_fee', 'transaction_fee', 'shipping_fee', 'pickup_date', 'status_updated_at', 'active_segment_id', 'total_collected'];
+    protected $fillable = ['id', 'party_id', 'currency_id', 'reference_id', 'pickup_address_id', 'delivery_address_id', 'tracking_number', 'payment_method', 'payment_provider', 'status', 'buyer_name', 'email', 'contact_number', 'subtotal', 'shipping', 'tax', 'fee', 'grand_total', 'metadata', 'ip_address', 'preferred_pickup_time', 'preferred_delivery_time', 'insurance', 'insurance_fee', 'transaction_fee', 'shipping_fee', 'pickup_date', 'status_updated_at', 'active_segment_id', 'total_collected', 'match_status', 'remarks'];
 
     /**
      * Returns the model validation rules.
@@ -34,6 +34,7 @@ class Order extends Model
             'payment_method' => 'string|required|in:' . implode(',', array_keys(config('settings.payment_methods'))),
             'payment_provider' => 'string|required|in:' . implode(',', array_keys(config('settings.payment_providers'))),
             'status' => 'string|in:' . implode(',', array_keys(config('settings.order_statuses'))),
+            'match_status' => 'string|in:' . implode(',', array_keys(config('settings.match_statuses'))),
             'buyer_name' => 'string|required|max:100',
             'email' => 'string|email|max:50|required_without:contact_number',
             'contact_number' => 'string|max:50|required_without:email',
@@ -47,6 +48,7 @@ class Order extends Model
             'ip_address' => 'ip|nullable',
             'preferred_pickup_time' => 'string|nullable|max:100',
             'preferred_delivery_time' => 'string|nullable|max:100',
+            'remarks' => 'string|nullable',
             'flagged' => 'integer|in:0,1'
         ];
 
@@ -408,6 +410,24 @@ class Order extends Model
     }
 
     /**
+     * Sets the the order match status.
+     */
+    public function setMatchStatus($status, $remarks = null)
+    {
+        // Check if the current status is the same as the new one.
+        if ($this->match_status == $status) {
+            return $this;
+        }
+
+        // Update the match status.
+        $this->match_status = $status;
+        $this->remarks = $remarks;
+        $this->save();
+
+        return $this;
+    }
+
+    /**
      * Sets the order turnaround time for the given status.
      */
     public function updateTat($status, $date = null)
@@ -661,6 +681,30 @@ class Order extends Model
             DB::rollback();
             throw $e;
         }
+    }
+
+    /**
+     * Sets the match status to "matched".
+     */
+    public function txnMatch($remarks = null)
+    {
+        return $this->setMatchStatus('match', $remarks);
+    }
+
+    /**
+     * Sets the match status to "over_remit".
+     */
+    public function txnOverRemit($remarks = null)
+    {
+        return $this->setMatchStatus('over_remit', $remarks);
+    }
+
+    /**
+     * Sets the match status to "under_remit".
+     */
+    public function txnUnderRemit($remarks = null)
+    {
+        return $this->setMatchStatus('under_remit', $remarks);
     }
 
     /**
