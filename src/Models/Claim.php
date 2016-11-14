@@ -16,7 +16,7 @@ class Claim extends Model
      * The attributes that are mass assignable.
      * @var array
      */
-    protected $fillable = ['order_id', 'status', 'reason', 'amount', 'shipping_fee_flag', 'insurance_fee_flag', 'transaction_fee_flag', 'assets', 'remarks', 'created_at', 'created_by', 'updated_at', 'updated_by'];
+    protected $fillable = ['order_id', 'status', 'reason', 'amount', 'shipping_fee_flag', 'insurance_fee_flag', 'transaction_fee_flag', 'assets', 'remarks', 'created_at', 'created_by', 'updated_at', 'updated_by', 'request_number', 'tat'];
 
     /**
      * The table's primary key.
@@ -39,6 +39,7 @@ class Claim extends Model
         // Set the validation rules.
         $rules = [
             'order_id' => 'integer|required|exists:pgsql.consumer.orders,id',
+            'request_number' => 'string|max:15',
             'status' => 'string|in:pending,verified,settled,declined',
             'reason' => 'string|required',
             'amount' => 'numeric|required|min:0|max:999999999999.99',
@@ -57,13 +58,15 @@ class Claim extends Model
      * @param int $order_id Order ID
      * @param float $amount Amount to be claimed
      * @param string $reason Claim reason
+     * @param array $assets Array of assets/images
      * @param int $shipping_fee_flag Set to 1 to refund shipping fee, set to 0 otherwise
      * @param int $insurance_fee_flag Set to 1 to refund insurance fee, set to 0 otherwise
      * @param int $transaction_fee_flag Set to 1 to refund transaction fee, set to 0 otherwise
      * @param string $remarks Miscellaneous remarks
      * @param string $status Claim status
+     * @param array $created_by User details
      */
-    public static function store($order_id, $amount, $reason, $assets = null, $shipping_fee_flag = 0, $insurance_fee_flag = 0, $transaction_fee_flag = 0, $remarks = null, $status = 'pending')
+    public static function store($order_id, $amount, $reason, $assets = null, $shipping_fee_flag = 0, $insurance_fee_flag = 0, $transaction_fee_flag = 0, $remarks = null, $status = 'pending', array $created_by = [])
     {
         try {
             // Start the transaction.
@@ -106,9 +109,15 @@ class Claim extends Model
                 throw new \Exception('The claim amount should not exceed the total order amount.', 422);
             }
 
+            // Set the tat.
+            $tat = json_encode([
+                'pending' => array_merge($created_by, ['date' => date('r')])
+            ]);
+
             // Build the list of attributes to be saved.
             $attributes = [
                 'order_id' => $order_id,
+                'request_number' => self::getRequestNumber($order_id),
                 'amount' => $amount,
                 'reason' => $reason,
                 'assets' => json_encode($assets),
@@ -117,6 +126,7 @@ class Claim extends Model
                 'transaction_fee_flag' => $transaction_fee_flag,
                 'remarks' => $remarks,
                 'status' => $status,
+                'tat' => $tat
             ];
 
             // Create the claim.
@@ -196,6 +206,17 @@ class Claim extends Model
             DB::rollback();
             throw $e;
         }
+    }
+
+    /**
+     * Generates a request number from the given order ID.
+     * @param int $order_id
+     */
+    public static function getRequestNumber($order_id)
+    {
+        // Generate the request number, in format XXXX-XXXX (eg, 0000-0001-ACLZ)
+        // Note we exclude I and O in the list so as not to confuse them with 1 and 0.
+        return implode("-", str_split(str_pad($order_id, 8, "0", STR_PAD_LEFT) . substr(str_shuffle("ABCDEFGHJKLMNPQRSTUVWXYZ"), 0, 4), 4));
     }
 
     /**

@@ -34,7 +34,7 @@ class Order extends Model
             'payment_method' => 'string|required|in:' . implode(',', array_keys(config('settings.payment_methods'))),
             'payment_provider' => 'string|required|in:' . implode(',', array_keys(config('settings.payment_providers'))),
             'status' => 'string|in:' . implode(',', array_keys(config('settings.order_statuses'))),
-            'match_status' => 'string|in:' . implode(',', array_keys(config('settings.match_statuses'))),
+            'match_status' => 'string|nullable|in:' . implode(',', array_keys(config('settings.match_statuses'))),
             'buyer_name' => 'string|required|max:100',
             'email' => 'string|email|max:50|required_without:contact_number',
             'contact_number' => 'string|max:50|required_without:email',
@@ -709,10 +709,19 @@ class Order extends Model
 
     /**
      * Claims an order.
+     * @param float $amount Amount to be claimed
+     * @param string $reason Claim reason
+     * @param array $assets Array of assets/images
+     * @param int $shipping_fee_flag Set to 1 to refund shipping fee, set to 0 otherwise
+     * @param int $insurance_fee_flag Set to 1 to refund insurance fee, set to 0 otherwise
+     * @param int $transaction_fee_flag Set to 1 to refund transaction fee, set to 0 otherwise
+     * @param string $remarks Miscellaneous remarks
+     * @param string $status Claim status
+     * @param array $created_by User details
      */
-    public function claimOrder($amount, $reason, $documentary_proof_url = null, $shipping_fee_flag = 0, $insurance_fee_flag = 0, $transaction_fee_flag = 0, $status = 'pending')
+    public function claimOrder($amount, $reason, $assets = null, $shipping_fee_flag = 0, $insurance_fee_flag = 0, $transaction_fee_flag = 0, $remarks = null, $status = 'pending', array $created_by = [])
     {
-        return Claim::store($this->id, $amount, $reason, $documentary_proof_url, $shipping_fee_flag, $insurance_fee_flag, $transaction_fee_flag, $status);
+        return Claim::store($this->id, $amount, $reason, $assets, $shipping_fee_flag, $insurance_fee_flag, $transaction_fee_flag, $remarks, $status, $created_by);
     }
 
     /**

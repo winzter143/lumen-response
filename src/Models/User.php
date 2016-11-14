@@ -104,4 +104,12 @@ class User extends Model
             throw $e;
         }
     }
+
+    /**
+     * Returns the user's full name.
+     */
+    public function getName()
+    {
+        return ucwords($this->first_name . ' ' . $this->last_name);
+    }
 }

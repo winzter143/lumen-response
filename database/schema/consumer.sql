@@ -182,6 +182,7 @@ CREATE TYPE consumer.claim_status AS ENUM ('pending', 'verified', 'settled', 'de
 CREATE TABLE consumer.claims
 (
   order_id INT NOT NULL,
+  request_number VARCHAR(15) NOT NULL,
   status consumer.claim_status NOT NULL DEFAULT 'pending',
   amount NUMERIC(14, 2) NOT NULL,
   shipping_fee_flag SMALLINT NOT NULL DEFAULT 0,
@@ -190,10 +191,12 @@ CREATE TABLE consumer.claims
   assets JSONB,
   reason TEXT NOT NULL,
   remarks TEXT,
+  tat JSONB,
   created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
   created_by INT,
   updated_at TIMESTAMP WITH TIME ZONE,
   updated_by INT,
   PRIMARY KEY (order_id),
-  CONSTRAINT claims_order_id_fk FOREIGN KEY (order_id) REFERENCES consumer.orders(id) ON DELETE NO ACTION ON UPDATE NO ACTION
+  CONSTRAINT claims_order_id_fk FOREIGN KEY (order_id) REFERENCES consumer.orders(id) ON DELETE NO ACTION ON UPDATE NO ACTION,
+  CONSTRAINT claims_request_number_uk UNIQUE (request_number)
 );
