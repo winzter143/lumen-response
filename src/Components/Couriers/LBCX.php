@@ -97,4 +97,12 @@ class LBCX extends Courier
     {
         return $default;
     }
+
+    /**
+     * Returns true if the courier is a third party courier.
+     */
+    public function isThirdParty()
+    {
+        return false;
+    }
 }

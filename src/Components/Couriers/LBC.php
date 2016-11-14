@@ -96,6 +96,15 @@ class LBC extends Courier
      */
     public function getReferenceId($default = null)
     {
+        // Generate a tracking number.
         return (string)DB::select('select nextval(:sequence)', ['sequence' => 'consumer.lbc_tracking_number_seq'])[0]['nextval'];
+    }
+
+    /**
+     * Returns true if the courier is a third party courier.
+     */
+    public function isThirdParty()
+    {
+        return true;
     }
 }

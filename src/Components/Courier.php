@@ -4,6 +4,7 @@ namespace F3\Components;
 use DB;
 use Cache;
 use F3\Models\Address;
+use GuzzleHttp\Client;
 
 /**
  * Abstract class for partner couriers.
@@ -50,6 +51,11 @@ abstract class Courier
      * @param string $default Reference ID
      */
     abstract public function getReferenceId($default = null);
+
+    /**
+     * Returns true if the courier is a third party courier.
+     */
+    abstract public function isThirdParty();
 
     /**
      * Converts the class name to key.
@@ -170,39 +176,43 @@ abstract class Courier
      */
     public static function ship(array $order, array $pickup_address, array $delivery_address)
     {
-        // Fetch the couriers.
-        $couriers = self::getCouriers();
+        try {
+            // Fetch the couriers.
+            $couriers = self::getCouriers();
 
-        // Determine the pickup courier.
-        $pickup = self::pickup($couriers, $order, $pickup_address);
+            // Determine the pickup courier.
+            $pickup = self::pickup($couriers, $order, $pickup_address);
 
-        if (!$pickup) {
-            throw new \Exception('No pickup courier available.');
+            if (!$pickup) {
+                throw new \Exception('No pickup courier available.');
+            }
+
+            // Determine the delivery courier.
+            $delivery = self::deliver($couriers, $order, $delivery_address);
+
+            if (!$delivery) {
+                throw new \Exception('No delivery courier available.');
+            }
+
+            // Determine if the shipment needs to be transferred to other hubs before the delivery segment.
+            $transfer = self::transfer($couriers, $pickup, $delivery);
+
+            // Create the pickup route.
+            $routes[] = self::createRoute('pick_up', $order, $pickup, $pickup_address, $pickup->hub['business'], $pickup_address, $delivery_address);
+
+            // Create the transfer route (if needed).
+            if ($transfer) {
+                $routes[] = self::createRoute('transfer', $order, $transfer, $pickup->hub['business'], $delivery->hub['business'], $pickup_address, $delivery_address);
+            }
+
+            // Create the delivery route.
+            $routes[] = self::createRoute('delivery', $order, $delivery, $delivery->hub['business'], $delivery_address, $pickup_address, $delivery_address);
+
+            // Return the routes and let the caller create the segments.
+            return $routes;
+        } catch (\Exception $e) {
+            throw $e;
         }
-
-        // Determine the delivery courier.
-        $delivery = self::deliver($couriers, $order, $delivery_address);
-
-        if (!$delivery) {
-            throw new \Exception('No delivery courier available.');
-        }
-
-        // Determine if the shipment needs to be transferred to other hubs before the delivery segment.
-        $transfer = self::transfer($couriers, $pickup, $delivery);
-
-        // Create the pickup route.
-        $routes[] = self::createRoute('pick_up', $order, $pickup, $pickup_address, $pickup->hub['business']);
-
-        // Create the transfer route (if needed).
-        if ($transfer) {
-            $routes[] = self::createRoute('transfer', $order, $transfer, $pickup->hub['business'], $delivery->hub['business']);
-        }
-
-        // Create the delivery route.
-        $routes[] = self::createRoute('delivery', $order, $delivery, $delivery->hub['business'], $delivery_address);
-
-        // Return the routes and let the caller create the segments.
-        return $routes;
     }
 
     /**
@@ -210,12 +220,15 @@ abstract class Courier
      * @param string $type Route type (pick_up | delivery | transfer)
      * @param array $order Order details
      * @param F3\Components\Courier $courier Courier object that will handle the shipment
-     * @param array $from Pickup address
-     * @param array $to Delivery address
+     * @param array $from Segment pickup address
+     * @param array $to Segment delivery address
+     * @param array $origin Shipment origin
+     * @param array $destination Shipment destination
      */
-    private static function createRoute($type, array $order, Courier $courier, array $from, array $to)
+    private static function createRoute($type, array $order, Courier $courier, array $from, array $to, array $origin = null, array $destination = null)
     {
-        return [
+        // Create the route.
+        $route = [
             'order_id' => $order['id'],
             'type' => $type,
             'courier' => $courier->getName(),
@@ -235,6 +248,32 @@ abstract class Courier
             'currency_id' => null,
             'amount' => null,
         ];
+
+        // Track the segment using SSM.
+        if ($courier->isThirdParty()) {
+            // Create an HTTP client.
+            $client = new Client;
+
+            // Set up the parameters.
+            // TODO: figure out where to put the environment variable.
+            $params = [
+                'slug' => str_slug($courier->getName()),
+                'tracking_number' => $route['reference_id'],
+                'failed_pick_up_tries' => env('SSM_RETRIES'),
+                'shipper_name' => array_get($origin, 'name'),
+                'shipper_destination' => Address::format($destination),
+            ];
+
+            // Send the request to SSM.
+            // TODO: figure out where to put the environment variable.
+            $response = $client->post(env('SSM_BASE_URL') . '/orders', ['json' => $params]);
+
+            if ($response->getStatusCode() != 200) {
+                // TODO: do we resend the request later?
+            }
+        }
+
+        return $route;
     }
 
     /**
@@ -373,5 +412,4 @@ abstract class Courier
 
         return false;
     }
-
 }
