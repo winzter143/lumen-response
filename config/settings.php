@@ -77,6 +77,12 @@ return [
         'failed_return' => 'Failed return',
         'out_for_delivery' => 'Out for delivery',
     ],
+    // List of transaction matching statuses.
+    'match_statuses' => [
+        'match' => 'Matched',
+        'over_remit' => 'Over Remit',
+        'under_remit' => 'Under Remit'
+    ],
     // List of payment methods and their display names.
     'payment_methods' => [
         'credit_card' => 'Credit Card',
@@ -88,7 +94,7 @@ return [
     'payment_providers' => [
         'asiapay' => 'Asiapay',
         'dragonpay' => 'Dragonpay',
-        'lbc' => 'LBC Expresses',
+        'lbc' => 'LBC Express',
         'lbcx' => 'LBCX'
     ],
     // List of local delivery areas.
