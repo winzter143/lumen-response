@@ -40,7 +40,7 @@ class PdfHelper
 
         /*file_put_contents(\Config::get('view.paths')[0] . '/awb.html', $awb);
         file_put_contents(\Config::get('view.paths')[0] . '/pod.html', $pod);*/
-        exit();
+        
         // Put files to s3, returns url
         $url = array('awb' => $this->putObjectToS3($resDir . "awb-$now-1.pdf", "Test-TrackingFile-$now.pdf"),
                 'pod' => $this->putObjectToS3($resDir . "pod-$now-1.pdf", "Test-POD-$now.pdf")
@@ -65,7 +65,7 @@ class PdfHelper
 
         $fileKey = sha1(time());
 
-        dispatch(new PdfBuilder($filters,$fileKey,$now));
+        $this->dispatch(new PdfBuilder($filters,$fileKey,$now));
 
         // Put temp files to s3, returns url
         $url = array('awb' => $this->putObjectToS3($resDir . "awb-$now.pdf", "Test-TrackingFile-$now.pdf"),
