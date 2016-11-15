@@ -48,7 +48,7 @@ class PdfBuilder implements ShouldQueue
         $orders = collect($this->getOrders());
 
         // Process pdf generation by chunks
-        foreach ($orders->chunk(250) as $chunk) {
+        foreach ($orders->chunk(20) as $chunk) {
             $pdfHelp = new PdfHelper();
             $pdfHelp->preparePdf($this->fileKey, $chunk);
         }
@@ -70,7 +70,7 @@ class PdfBuilder implements ShouldQueue
             'query' => [
                     'start_date' => $this->filters['start_date'],
                     'end_date' => $this->filters['end_date'],
-                    'per_page' => 1000
+                    'per_page' => 100
                 ]
             //'debug' => true
         ]);

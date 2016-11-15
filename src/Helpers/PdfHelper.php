@@ -27,7 +27,7 @@ class PdfHelper
     private function buildOne($order)
     {
         $now = date_format(new \DateTime(),"YmdHis");
-        $resDir = app()->basePath() . '/storage/pdf/';
+        $resDir = dirname(__DIR__) . '/../resources/pdf/';
 
         // Build order sticker
         $awb = $this->buildAwb($order);
@@ -40,7 +40,7 @@ class PdfHelper
 
         /*file_put_contents(\Config::get('view.paths')[0] . '/awb.html', $awb);
         file_put_contents(\Config::get('view.paths')[0] . '/pod.html', $pod);*/
-        
+        exit();
         // Put files to s3, returns url
         $url = array('awb' => $this->putObjectToS3($resDir . "awb-$now-1.pdf", "Test-TrackingFile-$now.pdf"),
                 'pod' => $this->putObjectToS3($resDir . "pod-$now-1.pdf", "Test-POD-$now.pdf")
@@ -57,7 +57,7 @@ class PdfHelper
     public function buildBatch($filters)
     {           
         $now = date_format(new \DateTime(),"YmdHis");
-        $resDir = app()->basePath() . '/storage/pdf/';
+        $resDir = dirname(__DIR__) . '/../resources/pdf/';
 
         // Create temporary file
         file_put_contents($resDir . "awb-$now.pdf", '');
