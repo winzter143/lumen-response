@@ -113,7 +113,7 @@ class Response extends HttpResponse
     public function withPagingHeaders()
     {
         // Change orders.api.lbcx.ph to api.lbcx.ph.
-        $prefixes = ['orders.'];
+        $prefixes = ['orders.', 'finance.', 'f3.'];
         $replacements = [''];
 
         // Update the links in the response body.
