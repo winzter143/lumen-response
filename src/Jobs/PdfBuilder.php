@@ -70,7 +70,8 @@ class PdfBuilder implements ShouldQueue
             'query' => [
                     'start_date' => $this->filters['start_date'],
                     'end_date' => $this->filters['end_date'],
-                    'per_page' => 100
+                    'per_page' => 0,
+                    'extended' => 1
                 ]
             //'debug' => true
         ]);
