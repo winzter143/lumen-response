@@ -3,8 +3,8 @@ namespace F3\Middleware;
 
 use Illuminate\Http\Request;
 use F3\Components\Response;
-use F3\Components\JWT;
 use Closure;
+use GuzzleHttp\Client;
 
 class AuthMiddleware
 {
@@ -29,16 +29,40 @@ class AuthMiddleware
                 }
             }
 
-            // Check the token.
-            $token = JWT::checkToken($token);
+            try {
+                // Validate the token.
+                // Create an HTTP client.
+                $client = new Client;
 
-            // Get the party.
-            $party = $token['party'];
+                // Set up the parameters.
+                $params = [
+                    'token' => $token,
+                    'role' => $role
+                ];
 
-            if ($role) {
-                // Check the role.
-                if (!$party->hasRole(explode('|', $role))) {
-                    throw new \Exception('You do not have sufficient privileges to access this resource.', 401);
+                // Send the request.
+                // The request is considered successful if we get a 200 status code.
+                // Note: only network errors and 4xx-5xx errors will throw an exception so we should still check the status code of the response.
+                // TODO: figure out how to require the environment variable.
+                $response = $client->post(env('F3_BASE_URL') . '/auth/token', ['json' => $params]);
+
+                if ($response->getStatusCode() == 200) {
+                    // Decode the response.
+                    $body = json_decode($response->getBody(), true);
+
+                    // Instantiate the party.
+                    $party = new $body['party']['class']($body['party']);
+                } else {
+                    throw new \Exception($response->getBody(), $response->getStatusCode());
+                }
+            } catch (\Exception $e) {
+                if ($e->getCode() == 401) {
+                    // Get the error message.
+                    $body = json_decode($e->getResponse()->getBody());
+                    throw new \Exception($body->description, 401);
+                } else {
+                    // Something else went wrong.
+                    throw $e;
                 }
             }
 
