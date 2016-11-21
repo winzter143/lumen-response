@@ -5,6 +5,7 @@ use Validator;
 use Cache;
 use DB;
 use F3\Models\Party;
+use F3\Models\Organization;
 
 class JWT 
 {
@@ -73,10 +74,10 @@ class JWT
                 }
                 */
             }
-            
+
             // Check if the party data is available from the cache.
             $token['party'] = Cache::get($token['payload']['sub']);
-
+            
             if (!$token['party']) {
                 // Get the party from the DB.
                 $token['party'] = Party::getByApiKey($token['payload']['sub']);
@@ -87,6 +88,43 @@ class JWT
 
                 // Cache it.
                 Cache::put($token['payload']['sub'], $token['party'], config('settings.cache.expires_in'));
+            }
+
+            // Check if the client is acting on behalf of another organization.
+            if (isset($token['payload']['obo'])) {
+                // Check if the sub-organization exists.
+                $sub_org = DB::table('core.parties')->where([['external_id', $token['payload']['obo']], ['type', 'organization']])->first();
+
+                if ($sub_org) {
+                    // The sub-organization exists.
+                    // Check the status.
+                    if (!$sub_org['status']) {
+                        throw new \Exception('Invalid "obo" value. The party has been disabled.', 401);
+                    }
+
+                    // Check if the relationship.
+                    $rel = DB::table('core.relationships')->where([['from_party_id', $sub_org['id']], ['type', 'merchant_of'], ['to_party_id', $token['party']->party_id]])->first();
+
+                    if (!$rel) {
+                        throw new \Exception('Invalid "obo" value. The party is not related to the principal.', 401);
+                    }
+
+                    // Get the details.
+                    $token['sub_party'] = [
+                        'party_id' => $sub_org['id'],
+                        'external_id' => $sub_org['external_id']
+                    ];
+                } else {
+                    // The sub-organization does not exist.
+                    // Create it.
+                    $org = Organization::store(null, $token['payload']['obo'], [['type' => 'merchant_of', 'to_party_id' => $token['party']->party_id]]);
+
+                    // Get the details.
+                    $token['sub_party'] = [
+                        'party_id' => $org->party_id,
+                        'external_id' => $token['payload']['obo']
+                    ];
+                }
             }
 
             // Check the signature.
@@ -156,7 +194,8 @@ class JWT
         // Validate the payload.
         $validator = Validator::make($payload, [
             'sub' => 'string|required',
-            'iat' => 'integer|required'
+            'iat' => 'integer|required',
+            'obo' => 'alpha_dash|nullable'
         ]);
 
         return $validator->passes();

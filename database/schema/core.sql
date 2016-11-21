@@ -44,6 +44,7 @@ CREATE TABLE core.parties
 (
   id SERIAL,
   type core.party_type NOT NULL,
+  external_id VARCHAR(100),
   status SMALLINT NOT NULL DEFAULT 1,
   metadata JSONB,
   created_by INT,
@@ -53,6 +54,7 @@ CREATE TABLE core.parties
   PRIMARY KEY (id)
 );
 CREATE INDEX parties_type_idx ON core.parties (type);
+CREATE INDEX parties_external_id_idx ON core.parties (external_id);
 
 --
 -- Table structure for table users
@@ -87,7 +89,7 @@ CREATE TABLE core.users
 CREATE TABLE core.organizations
 (
   party_id SERIAL,
-  name VARCHAR(255) NOT NULL,
+  name VARCHAR(255),
   PRIMARY KEY (party_id),
   CONSTRAINT organizations_name_name_uk UNIQUE (name),
   CONSTRAINT organizations_party_id_fk FOREIGN KEY (party_id) REFERENCES core.parties (id) ON DELETE NO ACTION ON UPDATE NO ACTION
@@ -97,7 +99,7 @@ CREATE INDEX organizations_name_fts_idx ON core.organizations USING gin(to_tsvec
 --
 -- Table structure for table relationships
 --
-CREATE TYPE core.relationship_type AS ENUM ('employee_of', 'friend_of', 'department_of');
+CREATE TYPE core.relationship_type AS ENUM ('employee_of', 'friend_of', 'department_of', 'merchant_of');
 CREATE TABLE core.relationships (
   id SERIAL,
   from_party_id INT NOT NULL,
