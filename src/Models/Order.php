@@ -85,6 +85,22 @@ class Order extends Model
     }
 
     /**
+     * An order has a pickup address.
+     */
+    public function pickupAddress()
+    {
+        return $this->hasOne('F3\Models\Address', 'id', 'pickup_address_id');
+    }
+
+    /**
+     * An order has a delivery address.
+     */
+    public function deliveryAddress()
+    {
+        return $this->hasOne('F3\Models\Address', 'id', 'delivery_address_id');
+    }
+
+    /**
      * Returns the next ID in the sequence.
      */
     public static function getNextId()
@@ -237,6 +253,75 @@ class Order extends Model
                 'charge' => $charge,
                 'order_segments' => $order_segments
             ];
+        } catch (\Exception $e) {
+            // Rollback and return the error.
+            DB::rollback();
+            throw $e;
+        }
+    }
+
+    /**
+     * Updates a shipment order.
+     */
+    public function updateOrder($currency, $pickup_address, $delivery_address, $payment_method, $payment_provider, $status, $buyer_name, $email, $contact_number, $metadata, $preferred_pickup_time, $preferred_delivery_time, $match_status, $remarks)
+    {
+        try {
+            // Start the transaction.
+            DB::beginTransaction();
+
+            // Look for the currency ID.
+            $currency_id = DB::table('core.currencies')->where('code', $currency)->value('id');
+
+            if (!$currency_id) {
+                throw new \Exception('The provided currency code is not valid.', 422);
+            }
+
+            // Set the currency.
+            $this->currency_id = $currency_id;
+
+            if ($this->pickup_address_id) {
+                // Update the pickup address.
+                $this->pickupAddress()->first()->updateAddress('pickup', array_get($pickup_address, 'name'), array_get($pickup_address, 'line_1'), array_get($pickup_address, 'line_2'), array_get($pickup_address, 'city'), array_get($pickup_address, 'state'), array_get($pickup_address, 'postal_code'), array_get($pickup_address, 'country'), array_get($pickup_address, 'remarks'), array_get($pickup_address, 'title'), array_get($pickup_address, 'email'), array_get($pickup_address, 'phone_number'), array_get($pickup_address, 'mobile_number'), array_get($pickup_address, 'fax_number'), array_get($pickup_address, 'company'));
+            } else {
+                // Create the pickup address.
+                $pickup_address = Address::store($this->party_id, 'pickup', array_get($pickup_address, 'name'), array_get($pickup_address, 'line_1'), array_get($pickup_address, 'line_2'), array_get($pickup_address, 'city'), array_get($pickup_address, 'state'), array_get($pickup_address, 'postal_code'), array_get($pickup_address, 'country'), array_get($pickup_address, 'remarks'), array_get($pickup_address, 'created_by'), array_get($pickup_address, 'title'), array_get($pickup_address, 'email'), array_get($pickup_address, 'phone_number'), array_get($pickup_address, 'mobile_number'), array_get($pickup_address, 'fax_number'), array_get($pickup_address, 'company'));
+
+                // Set the pickup address.
+                $this->pickup_address_id = $pickup_address->id;
+            }
+
+            if ($this->delivery_address_id) {
+                // Update the delivery address.
+                $this->deliveryAddress()->first()->updateAddress('delivery', array_get($delivery_address, 'name'), array_get($delivery_address, 'line_1'), array_get($delivery_address, 'line_2'), array_get($delivery_address, 'city'), array_get($delivery_address, 'state'), array_get($delivery_address, 'postal_code'), array_get($delivery_address, 'country'), array_get($delivery_address, 'remarks'), array_get($delivery_address, 'title'), array_get($delivery_address, 'email'), array_get($delivery_address, 'phone_number'), array_get($delivery_address, 'mobile_number'), array_get($delivery_address, 'fax_number'), array_get($delivery_address, 'company'));
+            } else {
+                // Create the destination address.
+                $delivery_address = Address::store($party_id, 'delivery', array_get($delivery_address, 'name'), array_get($delivery_address, 'line_1'), array_get($delivery_address, 'line_2'), array_get($delivery_address, 'city'), array_get($delivery_address, 'state'), array_get($delivery_address, 'postal_code'), array_get($delivery_address, 'country'), array_get($delivery_address, 'remarks'), array_get($delivery_address, 'created_by'), array_get($delivery_address, 'title'), array_get($delivery_address, 'email'), array_get($delivery_address, 'phone_number'), array_get($delivery_address, 'mobile_number'), array_get($delivery_address, 'fax_number'), array_get($delivery_address, 'company'));
+
+                // Set the delivery address.
+                $this->delivery_address_id = $delivery_address->id;
+            }
+
+            // Encode the metadata.
+            $metadata = ($metadata) ? json_encode($metadata) : null;
+
+            // Set the rest attributes.
+            $this->payment_method = $payment_method;
+            $this->payment_provider = $payment_provider;
+            $this->status = $status;
+            $this->buyer_name = $buyer_name;
+            $this->email = $email;
+            $this->contact_number = $contact_number;
+            $this->metadata = $metadata;
+            $this->preferred_pickup_time = $preferred_pickup_time;
+            $this->preferred_delivery_time = $preferred_delivery_time;
+            $this->match_status = $match_status;
+            $this->remarks = $remarks;
+
+            // Update the record.
+            $result = $this->save();
+            DB::commit();
+            return $result;
+
         } catch (\Exception $e) {
             // Rollback and return the error.
             DB::rollback();

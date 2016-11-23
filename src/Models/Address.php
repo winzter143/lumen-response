@@ -46,6 +46,14 @@ class Address extends Model
     }
 
     /**
+     * An address is tied to an order.
+     */
+    public function order()
+    {
+        return $this->belongsTo('F3\Models\Order');
+    }
+
+    /**
      * Creates a new address.
      */
     public static function store($party_id, $type, $name, $line_1, $line_2 = null, $city, $state, $postal_code, $country_code, $remarks = null, $created_by = null, $title = null, $email = null, $phone_number = null, $mobile_number = null, $fax_number = null, $company = null)
@@ -91,6 +99,46 @@ class Address extends Model
         } else {
             return self::create($attributes);
         }
+    }
+
+    /**
+     * Updates the address.
+     */
+    public function updateAddress($type, $name, $line_1, $line_2, $city, $state, $postal_code, $country_code, $remarks, $title, $email, $phone_number, $mobile_number, $fax_number, $company)
+    {
+        // Look for the country ID.
+        $country_id = DB::table('core.locations')->where([['type', 'country'], ['code', $country_code]])->value('id');
+
+        if (!$country_id) {
+            throw new \Exception("The provided country code for the {$type} address is not valid.", 422);
+        }
+
+        // Build the attribute list.
+        $attributes = [
+            'party_id' => $this->party_id,
+            'type' => $type,
+            'name' => $name,
+            'title' => $title,
+            'email' => $email,
+            'phone_number' => $phone_number,
+            'mobile_number' => $mobile_number,
+            'fax_number' => $fax_number,
+            'company' => $company,
+            'line_1' => $line_1,
+            'line_2' => $line_2,
+            'city' => $city,
+            'state' => $state,
+            'postal_code' => $postal_code,
+            'country_id' => $country_id,
+            'remarks' => $remarks,
+            'created_by' => $this->created_by
+        ];
+
+        // Hash the address.
+        $attributes['hash'] = self::hash($attributes);
+
+        // Update the address.
+        return $this->update($attributes);
     }
 
     /**
