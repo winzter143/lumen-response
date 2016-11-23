@@ -16,7 +16,7 @@ class Party extends Model
      * The attributes that are mass assignable.
      * @var array
      */
-    protected $fillable = ['type', 'status', 'metadata'];
+    protected $fillable = ['type', 'status', 'metadata', 'external_id'];
 
     /**
      * The table's primary key.
@@ -34,10 +34,11 @@ class Party extends Model
     public function getRules()
     {
         return [
-                'type' => 'string|required|in:' . implode(',', self::TYPES),
-                'status' => 'integer|required|in:0,1',
-                'metadata' => 'json|nullable',
-                ];
+            'type' => 'string|required|in:' . implode(',', self::TYPES),
+            'status' => 'integer|required|in:0,1',
+            'metadata' => 'json|nullable',
+            'external_id' => 'string|nullable|max:100'
+        ];
     }
 
     /**
@@ -123,9 +124,14 @@ class Party extends Model
     }
 
     /**
-     * Creates a new user.
+     * Creates a new party.
+     * @param string $type user|organization
+     * @param int $status 0|1
+     * @param string $metadata Json-encoded array of key-value pair attributes
+     * @param string $external_id Exnternal ID
+     * @param array $relationships Array of relationships the new party will be tied to
      */
-    public static function store($type, $status = 1, $metadata = null)
+    public static function store($type, $status = 1, $metadata = null, $external_id = null, array $relationships = [])
     {
         try {
             // Start the transaction.
@@ -133,15 +139,23 @@ class Party extends Model
             
             // Build the attribute list.
             $attributes = [
-                           'type' => $type,
-                           'status' => $status,
-                           'metadata' => $metadata
-                           ];
+                'type' => $type,
+                'status' => $status,
+                'external_id' => $external_id,
+                'metadata' => $metadata
+            ];
 
             // Create the party.
             $party = self::create($attributes);
 
-            // Commit and return the wallet.
+            // Create the relationships.
+            if ($relationships) {
+                foreach ($relationships as $rel) {
+                    Relationship::store($party->id, $rel['type'], $rel['to_party_id']);
+                }
+            }
+
+            // Commit and return the party.
             DB::commit();
             return $party;
         } catch (\Exception $e) {
