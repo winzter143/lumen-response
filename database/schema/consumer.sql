@@ -19,7 +19,7 @@ CREATE TABLE consumer.orders
   party_id INT NOT NULL,
   currency_id INT NOT NULL,
   reference_id VARCHAR(100) NOT NULL,
-  pickup_address_id INT NOT NULL,
+  pickup_address_id INT,
   delivery_address_id INT NOT NULL,
   return_address_id INT,
   active_segment_id INT,
