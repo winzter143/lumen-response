@@ -222,3 +222,16 @@ CREATE TABLE core.cron_scripts
   PRIMARY KEY (id),
   CONSTRAINT cron_scripts_name_uk UNIQUE (name)
 );
+
+--
+-- Table structure for table `banks`
+--
+CREATE TABLE core.banks (
+  id SERIAL,
+  name VARCHAR(255) NOT NULL,
+  swift_code VARCHAR(50),
+  phone_number VARCHAR(50),
+  created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  CONSTRAINT banks_name_uk UNIQUE (name)
+);
