@@ -51,7 +51,13 @@ class AuthMiddleware
                     $body = json_decode($response->getBody(), true);
 
                     // Instantiate the party.
-                    $party = new $body['party']['class']($body['party']);
+                    if (isset($body['obo'])) {
+                        // Use the sub-party in the request.
+                        $party = new $body['obo']['class']($body['obo']);
+                    } else {
+                        // Use the principal party in the request.
+                        $party = new $body['party']['class']($body['party']);
+                    }
                 } else {
                     throw new \Exception($response->getBody(), $response->getStatusCode());
                 }
