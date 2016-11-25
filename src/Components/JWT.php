@@ -93,37 +93,31 @@ class JWT
             // Check if the client is acting on behalf of another organization.
             if (isset($token['payload']['obo'])) {
                 // Check if the sub-organization exists.
-                $sub_org = DB::table('core.parties')->where([['external_id', $token['payload']['obo']], ['type', 'organization']])->first();
+                $obo = Party::with('organization')->where('external_id', $token['payload']['obo'])->first();
 
-                if ($sub_org) {
+                if ($obo) {
                     // The sub-organization exists.
                     // Check the status.
-                    if (!$sub_org['status']) {
+                    if (!$obo->status) {
                         throw new \Exception('Invalid "obo" value. The party has been disabled.', 401);
                     }
 
                     // Check if the relationship.
-                    $rel = DB::table('core.relationships')->where([['from_party_id', $sub_org['id']], ['type', 'merchant_of'], ['to_party_id', $token['party']->party_id]])->first();
+                    $rel = DB::table('core.relationships')->where([['from_party_id', $obo->id], ['type', 'merchant_of'], ['to_party_id', $token['party']->party_id]])->first();
 
                     if (!$rel) {
                         throw new \Exception('Invalid "obo" value. The party is not related to the principal.', 401);
                     }
 
                     // Get the details.
-                    $token['sub_party'] = [
-                        'party_id' => $sub_org['id'],
-                        'external_id' => $sub_org['external_id']
-                    ];
+                    $token['obo'] = $obo->organization;
                 } else {
                     // The sub-organization does not exist.
                     // Create it.
                     $org = Organization::store(null, $token['payload']['obo'], [['type' => 'merchant_of', 'to_party_id' => $token['party']->party_id]]);
 
                     // Get the details.
-                    $token['sub_party'] = [
-                        'party_id' => $org->party_id,
-                        'external_id' => $token['payload']['obo']
-                    ];
+                    $token['obo'] = $org;
                 }
             }
 
