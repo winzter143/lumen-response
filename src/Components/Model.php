@@ -74,4 +74,12 @@ class Model extends EloquentModel
     {
         return (self::PG_ERROR_UNIQUE_VIOLATION == $error_code);
     }
+
+    /**
+     * Tell Carbon not to return the dates.
+     */
+    public function getDates()
+    {
+        return [];
+    }
 }

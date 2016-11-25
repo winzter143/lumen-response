@@ -46,6 +46,14 @@ class Organization extends Model
     }
 
     /**
+     * An organization belongs to a party.
+     */
+    public function organization()
+    {
+        return $this->hasOne('F3\Models\Party');
+    }
+
+    /**
      * Creates a new organization.
      * @param string $name Organization name
      * @param string $external_id External ID

@@ -42,6 +42,32 @@ class Party extends Model
     }
 
     /**
+     * A party has one organization.
+     */
+    public function organization()
+    {
+        return $this->hasOne('F3\Models\Organization', 'party_id');
+    }
+
+    /**
+     * A party has many bank accounts.
+     */
+    public function bankAccounts()
+    {
+        return $this->hasMany('F3\Models\BankAccount');
+    }
+
+    /**
+     * Active scope.
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeActive($query)
+    {
+        return $query->where('status', 1);
+    }
+
+    /**
      * Returns the party by API key.
      */
     public static function getByApiKey($api_key)
@@ -163,5 +189,21 @@ class Party extends Model
             DB::rollback();
             throw $e;
         }
+    }
+
+    /**
+     * Creates a new bank account.
+     * @param int $bank_id Bank ID
+     * @param int $currency Three-letter currency code
+     * @param int $account_number Account number
+     * @param int $first_name Account first name
+     * @param int $last_name Account last name
+     * @param int $branch Bank branch
+     * @param int $type savings|current
+     * @param int $class personal|business
+     */
+    public function addBankAccount($bank_id, $currency, $account_number, $first_name, $last_name, $branch = null, $type = null, $class = null)
+    {
+        return BankAccount::store($this->id, $bank_id, $currency, $account_number, $first_name, $last_name, $branch, $type, $class);
     }
 }

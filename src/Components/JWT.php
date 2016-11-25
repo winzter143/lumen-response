@@ -77,7 +77,7 @@ class JWT
 
             // Check if the party data is available from the cache.
             $token['party'] = Cache::get($token['payload']['sub']);
-            
+
             if (!$token['party']) {
                 // Get the party from the DB.
                 $token['party'] = Party::getByApiKey($token['payload']['sub']);

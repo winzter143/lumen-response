@@ -235,3 +235,43 @@ CREATE TABLE core.banks (
   PRIMARY KEY (id),
   CONSTRAINT banks_name_uk UNIQUE (name)
 );
+
+--
+-- Table structure for table `banks`
+--
+CREATE TABLE core.banks (
+  id SERIAL,
+  name VARCHAR(255) NOT NULL,
+  swift_code VARCHAR(50),
+  phone_number VARCHAR(50),
+  created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  CONSTRAINT banks_name_uk UNIQUE (name)
+);
+
+--
+-- Table structure for table `bank_accounts`
+--
+CREATE TYPE core.bank_account_type AS ENUM ('savings', 'current');
+CREATE TYPE core.bank_account_class AS ENUM ('personal', 'business');
+CREATE TABLE core.bank_accounts
+(
+  id SERIAL,
+  party_id INT NOT NULL,
+  bank_id INT NOT NULL,
+  currency_id INT NOT NULL,
+  account_number VARCHAR(100) NOT NULL,
+  first_name VARCHAR(50) NOT NULL,
+  last_name VARCHAR(50) NOT NULL,
+  branch VARCHAR(255),
+  type core.bank_account_type,
+  class core.bank_account_class,
+  created_at TIMESTAMP WITH TIME ZONE NOT NULL,
+  updated_at TIMESTAMP WITH TIME ZONE NOT NULL,
+  PRIMARY KEY (id),
+  CONSTRAINT bank_accounts_bank_id_account_number_uk UNIQUE (bank_id, account_number),
+  CONSTRAINT bank_accounts_party_id_fk FOREIGN KEY (party_id) REFERENCES core.parties (id) ON DELETE NO ACTION ON UPDATE NO ACTION,
+  CONSTRAINT bank_accounts_bank_id_fk FOREIGN KEY (bank_id) REFERENCES core.banks (id) ON DELETE NO ACTION ON UPDATE NO ACTION,
+  CONSTRAINT bank_accounts_currency_id_fk FOREIGN KEY (currency_id) REFERENCES core.currencies (id) ON DELETE NO ACTION ON UPDATE NO ACTION
+);
+CREATE INDEX bank_accounts_party_id_idx ON core.bank_accounts (party_id);
