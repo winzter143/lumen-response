@@ -54,6 +54,14 @@ class Address extends Model
     }
 
     /**
+     * An address has a country.
+     */
+    public function country()
+    {
+        return $this->hasOne('F3\Models\Location', 'id', 'country_id');
+    }
+
+    /**
      * Creates a new address.
      */
     public static function store($party_id, $type, $name, $line_1, $line_2 = null, $city, $state, $postal_code, $country_code, $remarks = null, $created_by = null, $title = null, $email = null, $phone_number = null, $mobile_number = null, $fax_number = null, $company = null)
