@@ -83,6 +83,13 @@ return [
         'over_remit' => 'Over Remit',
         'under_remit' => 'Under Remit'
     ],
+    // List of claim statuses and their display names.
+    'claim_statuses' => [
+        'pending' => 'Pending',
+        'verified' => 'Verfied',
+        'settled' => 'Settled',
+        'declined' => 'Declined'
+    ],
     // List of payment methods and their display names.
     'payment_methods' => [
         'credit_card' => 'Credit Card',
