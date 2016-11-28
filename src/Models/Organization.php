@@ -54,6 +54,14 @@ class Organization extends Model
     }
 
     /**
+     * An organization has many orders.
+     */
+    public function orders()
+    {
+        return $this->hasMany('F3\Models\Order', 'party_id', 'party_id');
+    }
+
+    /**
      * Creates a new organization.
      * @param string $name Organization name
      * @param string $external_id External ID

@@ -148,32 +148,61 @@ class Claim extends Model
     /**
      * Sets the the claim status.
      */
-    public function setStatus($status)
+    public function setStatus($status, $remarks = null, $update_tat = true)
     {
-        // Check if the current status is the same as the new one.
-        if ($this->status == $status) {
+        try {
+            // Start the transaction.
+            DB::beginTransaction();
+
+            // Check if the current status is the same as the new one.
+            if ($this->status == $status) {
+                return $this;
+            }
+
+            // Update the order status.
+            $this->status = $status;
+            $this->remarks = $remarks;
+            $this->save();
+
+            if ($update_tat) {
+                $this->updateTat($status);
+            }
+
+            // Commit.
+            DB::commit();
             return $this;
+        } catch (\Exception $e) {
+            // Rollback and return the error.
+            DB::rollback();
+            throw $e;
         }
+    }
 
-        // Update the order status.
-        $this->status = $status;
-        $this->save();
-
-        return $this;
+    /**
+     * Sets the order turnaround time for the given status.
+     */
+    public function updateTat($status, $date = null)
+    {
+        // Update the turnaround time.
+        $tat = json_decode($this->tat, true);
+        $tat[$status] = ($date) ? date('r', strtotime($date)) : date('r');
+        $tat = json_encode($tat);
+        $this->tat = $tat;
+        return $this->save();
     }
 
     /**
      * Sets the claim status to "pending".
      */
-    public function pending()
+    public function pending($remarks = null)
     {
-        return $this->setStatus('pending');
+        return $this->setStatus('pending', $remarks);
     }
 
     /**
      * Sets the claim status to "verified".
      */
-    public function verified($ip_address = null)
+    public function verified($ip_address = null, $remarks = null)
     {
         try {
             // Start the transaction.
@@ -212,6 +241,39 @@ class Claim extends Model
     }
 
     /**
+     * Sets the claim status to "settled".
+     */
+    public function settled($reference_id, $remarks = null)
+    {
+        try {
+            // Start the transaction.
+            DB::beginTransaction();
+
+            // Set the reference ID.
+            $this->reference_id = $reference_id;
+
+            // Update the status.
+            $this->setStatus('settled', $remarks);
+
+            // Commit.
+            DB::commit();
+            return $this;
+        } catch (\Exception $e) {
+            // Rollback and return the error.
+            DB::rollback();
+            throw $e;
+        }
+    }
+
+    /**
+     * Sets the claim status to "declined".
+     */
+    public function declined($remarks)
+    {
+        return $this->setStatus('declined', $remarks);
+    }
+
+    /**
      * Generates a request number from the given order ID.
      * @param int $order_id
      */
@@ -220,21 +282,5 @@ class Claim extends Model
         // Generate the request number, in format XXXX-XXXX (eg, 0000-0001-ACLZ)
         // Note we exclude I and O in the list so as not to confuse them with 1 and 0.
         return implode("-", str_split(str_pad($order_id, 8, "0", STR_PAD_LEFT) . substr(str_shuffle("ABCDEFGHJKLMNPQRSTUVWXYZ"), 0, 4), 4));
-    }
-
-    /**
-     * Sets the claim status to "settled".
-     */
-    public function settled()
-    {
-        return $this->setStatus('settled');
-    }
-
-    /**
-     * Sets the claim status to "declined".
-     */
-    public function declined()
-    {
-        return $this->setStatus('declined');
     }
 }

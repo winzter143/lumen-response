@@ -101,6 +101,14 @@ class Order extends Model
     }
 
     /**
+     * An order belongs to an organization.
+     */
+    public function organization()
+    {
+        return $this->belongsTo('F3\Models\Organization', 'party_id', 'party_id');
+    }
+
+    /**
      * Returns the next ID in the sequence.
      */
     public static function getNextId()
