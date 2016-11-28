@@ -15,12 +15,12 @@ class RolesSeeder extends Seeder
         'finance' => [
             'name' => 'finance',
             'display_name' => 'Finance',
-            'permissions' => ['view-orders', 'view-order', 'upload-transactions', 'edit-transaction'],
+            'permissions' => ['view-orders', 'view-order', 'upload-transactions', 'edit-transaction', 'view-claims', 'view-claim', 'edit-claims'],
         ],
         'oms' => [
             'name' => 'oms',
             'display_name' => 'OMS',
-            'permissions' => ['view-orders', 'view-order', 'upload-orders', 'edit-order'],
+            'permissions' => ['view-orders', 'view-order', 'upload-orders', 'edit-order', 'view-claims', 'view-claim', 'edit-claims'],
         ],
         'client' => [
             'name' => 'client',
