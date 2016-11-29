@@ -85,6 +85,13 @@ class Organization extends Model
             // Create the organization. 
             $org = self::create($attributes);
 
+            // Create the wallets.
+            // TODO: Should we create both the fund wallet and settlement wallet for all organizations?
+            $fund = config('settings.defaults.wallets.fund');
+            $settlement = config('settings.defaults.wallets.settlement');
+            Wallet::store($party->id, 'fund', $fund['currency'], $fund['max_limit'], $fund['credit_limit']);
+            Wallet::store($party->id, 'settlement', $settlement['currency'], $settlement['max_limit'], $settlement['credit_limit']);
+
             // Commit and return the organization.
             DB::commit();
             return $org;

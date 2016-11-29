@@ -30,6 +30,18 @@ return [
             'last_error' => [],
             'callback_url' => null,
             'status_updated_at' => null
+        ],
+        'wallets' => [
+            'fund' => [
+                'currency' => 'PHP',
+                'max_limit' => null,
+                'credit_limit' => 0
+            ],
+            'settlement' => [
+                'currency' => 'PHP',
+                'max_limit' => null,
+                'credit_limit' => 0
+            ]
         ]
     ],
     'awb' => [
