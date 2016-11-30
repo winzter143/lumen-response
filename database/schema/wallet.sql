@@ -30,7 +30,7 @@ CREATE INDEX "wallets_idx_wallets_currency_id" ON wallet."wallets" ("currency_id
 --
 -- Table structure for table transfers
 --
-CREATE TYPE wallet."transfers_enum_type" as enum('purchase','transfer','refund','reward','escrow','disbursement','settlement');
+CREATE TYPE wallet."transfers_enum_type" as enum('purchase','transfer','refund','reward','escrow','disbursement','settlement','sale','fund');
 CREATE TABLE wallet."transfers" (
   "id" serial ,
   "from_wallet_id" integer NOT NULL ,

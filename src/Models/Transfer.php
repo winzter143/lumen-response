@@ -31,7 +31,7 @@ class Transfer extends Model
     /**
      * Wallet types.
      */
-    const TYPES = ['purchase', 'transfer', 'refund', 'reward', 'escrow', 'disbursement', 'settlement'];
+    const TYPES = ['purchase', 'transfer', 'refund', 'reward', 'escrow', 'disbursement', 'settlement', 'sale', 'fund'];
 
     /**
      * Returns the model validation rules.
