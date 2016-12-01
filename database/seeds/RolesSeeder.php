@@ -10,32 +10,32 @@ class RolesSeeder extends Seeder
         'admin' => [
             'name' => 'admin',
             'display_name' => 'Administrator',
-            'permissions' => ['create-user', 'edit-user', 'enable-user', 'disable-user'],
+            'permissions' => ['create-order', 'view-order', 'view-orders', 'edit-order', 'upload-orders', 'create-claim', 'view-claim', 'view-claims', 'edit-claims', 'view-wallets', 'view-wallet', 'view-bank-accounts', 'view-bank-account', 'view-parties', 'view-party'],
         ],
         'finance' => [
             'name' => 'finance',
             'display_name' => 'Finance',
-            'permissions' => ['view-orders', 'view-order', 'upload-transactions', 'edit-transaction', 'view-claims', 'view-claim', 'edit-claims', 'view-wallets', 'view-wallet', 'view-bank-accounts', 'view-bank-account'],
+            'permissions' => ['create-order', 'view-order', 'view-orders', 'edit-order', 'upload-orders', 'create-claim', 'view-claim', 'view-claims', 'edit-claims', 'view-wallets', 'view-wallet', 'view-bank-accounts', 'view-bank-account', 'view-parties', 'view-party'],
         ],
         'oms' => [
             'name' => 'oms',
             'display_name' => 'OMS',
-            'permissions' => ['view-orders', 'view-order', 'upload-orders', 'edit-order', 'view-claims', 'view-claim', 'edit-claims'],
+            'permissions' => ['create-order', 'view-order', 'view-orders', 'edit-order', 'upload-orders', 'create-claim', 'view-claim', 'view-claims', 'edit-claims', 'view-parties', 'view-party'],
         ],
         'client' => [
             'name' => 'client',
             'display_name' => 'Client System',
-            'permissions' => ['create-order', 'view-own-orders', 'view-own-order', 'edit-own-order'],
+            'permissions' => ['create-order', 'view-order', 'view-orders', 'edit-order', 'view-wallets', 'view-wallet', 'view-bank-accounts', 'view-bank-account', 'view-claims', 'view-claim'],
         ],
         'courier' => [
             'name' => 'courier',
             'display_name' => 'Courier',
-            'permissions' => ['view-orders', 'view-order', 'edit-order'],
+            'permissions' => ['create-order', 'view-order', 'view-orders', 'edit-order', 'view-wallets', 'view-wallet', 'view-bank-accounts', 'view-bank-account', 'view-claims', 'view-claim'],
         ],
         'hub' => [
             'name' => 'hub',
             'display_name' => 'hub',
-            'permissions' => ['view-orders', 'view-order', 'edit-order'],
+            'permissions' => ['create-order', 'view-order', 'view-orders', 'edit-order', 'view-wallets', 'view-wallet', 'view-bank-accounts', 'view-bank-account', 'view-claims', 'view-claim'],
         ]
     ];
 
