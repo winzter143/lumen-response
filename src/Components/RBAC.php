@@ -72,8 +72,8 @@ trait RBAC
         $has_permission = in_array($permission, $user_roles);
 
         // Check if the user can view any party in the system.
-        // "view-party" is a special role in the system that is assigned only to system users.
-        if (in_array('view-party', $user_roles)) {
+        // "manage-party" is a special role in the system that is assigned only to system users.
+        if (in_array('manage-party', $user_roles)) {
             $can_view_party = true;
         } else {
             $can_view_party = ($this->party_id == $party_id);
