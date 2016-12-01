@@ -114,7 +114,7 @@ class JWT
                 } else {
                     // The sub-organization does not exist.
                     // Create it.
-                    $org = Organization::store(null, $token['payload']['obo'], [['type' => 'merchant_of', 'to_party_id' => $token['party']->party_id]]);
+                    $org = Organization::store(null, $token['payload']['obo'], [['type' => 'merchant_of', 'to_party_id' => $token['party']->party_id]], ['client']);
 
                     // Get the details.
                     $token['obo'] = $org;

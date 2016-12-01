@@ -15,7 +15,7 @@ class Model extends EloquentModel
      * Unique constraint violation error code.
      */
     const PG_ERROR_UNIQUE_VIOLATION = 23505;
-
+    
     /**
      * Constructor
      */
@@ -76,7 +76,7 @@ class Model extends EloquentModel
     }
 
     /**
-     * Tell Carbon not to return the dates.
+     * Tells Laravel which date columns to convert to Carbon.
      */
     public function getDates()
     {

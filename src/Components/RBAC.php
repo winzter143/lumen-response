@@ -60,27 +60,27 @@ trait RBAC
 
     /**
      * Checks if the permission is assigned to the user.
-     * @param string|array $permissions
+     * @param string $permission
+     * @param int $party_id
      */
-    public function can($permissions)
+    public function can($permission, $party_id = null)
     {
         // Get the user roles.
-        $user_roles = $this->getRoles();
-
-        // Convert $permissions to an array.
-        if (!is_array($permissions)) {
-            $permissions = [$permissions];
-        }
+        $user_roles = array_flatten($this->getRoles());
 
         // Check if the user is assigned the permission.
-        foreach ($permissions as $permission) {
-            if (in_array($permission, array_flatten($user_roles))) {
-                return true;
-            }
+        $has_permission = in_array($permission, $user_roles);
+
+        // Check if the user can view any party in the system.
+        // "manage-party" is a special role in the system that is assigned only to system users.
+        if (in_array('manage-party', $user_roles)) {
+            $can_view_party = true;
+        } else {
+            $can_view_party = ($this->party_id == $party_id);
         }
 
-        // None of the permissions are assigned to the user.
-        return false;
+        // Check if the user has the permission and can view the party.
+        return ($has_permission && $can_view_party);
     }
 
     /**

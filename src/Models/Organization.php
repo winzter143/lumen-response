@@ -66,8 +66,9 @@ class Organization extends Model
      * @param string $name Organization name
      * @param string $external_id External ID
      * @param array $relationships Array of relationships
+     * @param array $roles Array of roles
      */
-    public static function store($name = null, $external_id = null, array $relationships = [])
+    public static function store($name = null, $external_id = null, array $relationships = [], array $roles = [])
     {
         try {
             // Start the transaction.
@@ -91,6 +92,13 @@ class Organization extends Model
             $settlement = config('settings.defaults.wallets.settlement');
             Wallet::store($party->id, 'fund', $fund['currency'], $fund['max_limit'], $fund['credit_limit']);
             Wallet::store($party->id, 'settlement', $settlement['currency'], $settlement['max_limit'], $settlement['credit_limit']);
+
+            if ($roles) {
+                // Assign the roles.
+                foreach ($roles as $role) {
+                    $org->assignRole($role);
+                }
+            }
 
             // Commit and return the organization.
             DB::commit();
