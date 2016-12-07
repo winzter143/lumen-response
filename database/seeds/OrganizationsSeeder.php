@@ -128,6 +128,24 @@ class OrganizationsSeeder extends Seeder
             ]
         ]
     ], [
+        'name' => 'Gaudy',
+        'role' => 'client',
+        'metadata' => null,
+        'wallets' => [
+            'fund' => [
+                'currency' => 'PHP',
+                'amount' => 0,
+                'credit_limit' => 0,
+                'max_limit' => null
+            ],
+            'settlement' => [
+                'currency' => 'PHP',
+                'amount' => 0,
+                'credit_limit' => 0,
+                'max_limit' => null
+            ]
+        ]
+    ], [
         'name' => 'LBCX North Hub',
         'role' => 'hub',
         'metadata' => [
