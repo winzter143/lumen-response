@@ -228,7 +228,7 @@ class Claim extends Model
 
             // Transfer the claim amount, shipping, insurance, and transaction fees from the system's sales wallet to the client's fund wallet.
             $details = 'Claim for order #' . $this->order->tracking_number;
-            Wallet::transfer(config('settings.system_party_id'), $this->order->party_id, 'sales', 'fund', $this->order->currency->code, $amount, 'fund', $details, $this->order_id, $ip_address);
+            Wallet::transfer(config('settings.system_party_id'), $this->order->party_id, 'sales', 'fund', $this->order->currency->code, $amount, 'claim', $details, $this->order_id, $ip_address);
 
             // Commit.
             DB::commit();

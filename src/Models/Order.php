@@ -734,7 +734,7 @@ class Order extends Model
             // We transfer twice the shipping fee plus insurance fee.
             $details = 'Return for order #' . $this->tracking_number;
             $amount = ($this->shipping_fee * 2) + $this->insurance_fee;
-            Wallet::transfer($this->party_id, config('settings.system_party_id'), 'fund', 'sales', $this->currency->code, $amount, 'sale', $details, $this->id, $ip_address);
+            Wallet::transfer($this->party_id, config('settings.system_party_id'), 'fund', 'sales', $this->currency->code, $amount, 'return', $details, $this->id, $ip_address);
 
             // Commit.
             DB::commit();
@@ -763,7 +763,7 @@ class Order extends Model
             // We transfer twice the shipping fee plus insurance fee.
             $details = 'Return for order #' . $this->tracking_number;
             $amount = ($this->shipping_fee * 2) + $this->insurance_fee;
-            Wallet::transfer($this->party_id, config('settings.system_party_id'), 'fund', 'sales', $this->currency->code, $amount, 'sale', $details, $this->id, $ip_address);
+            Wallet::transfer($this->party_id, config('settings.system_party_id'), 'fund', 'sales', $this->currency->code, $amount, 'return', $details, $this->id, $ip_address);
             
             // Commit.
             DB::commit();
