@@ -162,13 +162,20 @@ class Address extends Model
      */
     public static function format(array $address, $delimeter = '\n')
     {
+        // Get the country.
+        $country = array_get($address, 'country');
+
+        if (is_array($country)) {
+            $country = array_get($country, 'code');
+        }
+
         return trim(str_replace('  ', ' ', implode($delimeter, [
             array_get($address, 'line_1'),
             array_get($address, 'line_2'),
             array_get($address, 'city'),
             array_get($address, 'state'),
             array_get($address, 'postal_code'),
-            array_get($address, 'country')
+            array_get($address, $country')
         ])));
     }
 
