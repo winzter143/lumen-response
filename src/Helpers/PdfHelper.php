@@ -65,7 +65,7 @@ class PdfHelper
 
         $fileKey = sha1(time());
 
-        $this->dispatch(new PdfBuilder($filters,$fileKey,$now));
+        dispatch(new PdfBuilder($filters,$fileKey,$now));
 
         // Put temp files to s3, returns url
         $url = array('awb' => $this->putObjectToS3($resDir . "awb-$now.pdf", "Test-TrackingFile-$now.pdf"),
