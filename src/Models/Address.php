@@ -175,7 +175,7 @@ class Address extends Model
             array_get($address, 'city'),
             array_get($address, 'state'),
             array_get($address, 'postal_code'),
-            array_get($address, $country')
+            array_get($address, $country)
         ])));
     }
 
