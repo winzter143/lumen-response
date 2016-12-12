@@ -40,6 +40,14 @@ class OrderItem extends Model
     }
 
     /**
+     * An item belongs to an order.
+     */
+    public function order()
+    {
+        return $this->belongsTo('F3\Models\Order');
+    }
+
+    /**
      * Creates a new order item.
      */
     public static function store($order_id, $type, $description, $amount, $quantity = 1, $metadata = null)
@@ -64,6 +72,10 @@ class OrderItem extends Model
         ]);
 
         // Create the order item.
-        return self::create($attributes);
+        $item = self::create($attributes);
+
+        // Decode the metadata.
+        $item->metadata = json_decode($item->metadata);
+        return $item;
     }
 }

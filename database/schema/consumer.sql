@@ -107,7 +107,7 @@ ALTER TABLE consumer.orders ADD CONSTRAINT orders_active_segment_id FOREIGN KEY 
 CREATE TABLE consumer.order_events
 (
   id SERIAL,
-  order_segment_id INT NOT NULL,
+  order_segment_id INT,
   status consumer.order_status NOT NULL,
   remarks TEXT,
   created_by INT,

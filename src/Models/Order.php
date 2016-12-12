@@ -28,7 +28,7 @@ class Order extends Model
         $rules = [
             'party_id' => 'integer|required|exists:pgsql.core.organizations,party_id',
             'currency_id' => 'integer|required|exists:pgsql.core.currencies,id',
-            'pickup_address_id' => 'integer|required|exists:pgsql.core.addresses,id',
+            'pickup_address_id' => 'integer|nullable|exists:pgsql.core.addresses,id',
             'delivery_address_id' => 'integer|required|exists:pgsql.core.addresses,id',
             'tracking_number' => 'string|max:15',
             'payment_method' => 'string|required|in:' . implode(',', array_keys(config('settings.payment_methods'))),
@@ -101,6 +101,14 @@ class Order extends Model
     }
 
     /**
+     * An order has many items.
+     */
+    public function items()
+    {
+        return $this->hasMany('F3\Models\OrderItem');
+    }
+
+    /**
      * An order belongs to an organization.
      */
     public function organization()
@@ -132,8 +140,10 @@ class Order extends Model
                 throw new \Exception('The provided currency code is not valid.', 422);
             }
 
-            // Create the source address.
-            $pickup_address = Address::store($party_id, 'pickup', array_get($pickup_address, 'name'), array_get($pickup_address, 'line_1'), array_get($pickup_address, 'line_2'), array_get($pickup_address, 'city'), array_get($pickup_address, 'state'), array_get($pickup_address, 'postal_code'), array_get($pickup_address, 'country'), array_get($pickup_address, 'remarks'), array_get($pickup_address, 'created_by'), array_get($pickup_address, 'title'), array_get($pickup_address, 'email'), array_get($pickup_address, 'phone_number'), array_get($pickup_address, 'mobile_number'), array_get($pickup_address, 'fax_number'), array_get($pickup_address, 'company'));
+            // Create the pick up address if it's passed.
+            if ($pickup_address) {
+                $pickup_address = Address::store($party_id, 'pickup', array_get($pickup_address, 'name'), array_get($pickup_address, 'line_1'), array_get($pickup_address, 'line_2'), array_get($pickup_address, 'city'), array_get($pickup_address, 'state'), array_get($pickup_address, 'postal_code'), array_get($pickup_address, 'country'), array_get($pickup_address, 'remarks'), array_get($pickup_address, 'created_by'), array_get($pickup_address, 'title'), array_get($pickup_address, 'email'), array_get($pickup_address, 'phone_number'), array_get($pickup_address, 'mobile_number'), array_get($pickup_address, 'fax_number'), array_get($pickup_address, 'company'));
+            }
 
             // Create the destination address.
             $delivery_address = Address::store($party_id, 'delivery', array_get($delivery_address, 'name'), array_get($delivery_address, 'line_1'), array_get($delivery_address, 'line_2'), array_get($delivery_address, 'city'), array_get($delivery_address, 'state'), array_get($delivery_address, 'postal_code'), array_get($delivery_address, 'country'), array_get($delivery_address, 'remarks'), array_get($delivery_address, 'created_by'), array_get($delivery_address, 'title'), array_get($delivery_address, 'email'), array_get($delivery_address, 'phone_number'), array_get($delivery_address, 'mobile_number'), array_get($delivery_address, 'fax_number'), array_get($delivery_address, 'company'));
@@ -159,11 +169,10 @@ class Order extends Model
             $attributes = array_merge($breakdown, $fees, [
                 'id' => $order_id,
                 'tracking_number' => $tracking_number,
-                'pickup_address_id' => $pickup_address->id,
+                'pickup_address_id' => ($pickup_address) ? $pickup_address->id : null,
                 'delivery_address_id' => $delivery_address->id,
                 'party_id' => $party_id,
                 'currency_id' => $currency_id,
-                'pickup_address' => $pickup_address,
                 'delivery' => $delivery_address,
                 'buyer_name' => $buyer_name,
                 'email' => $email,
@@ -180,6 +189,9 @@ class Order extends Model
 
             // Create the order.
             $order = self::create($attributes);
+
+            // The order has been created. Log the pending status.
+            $order->addEvent('pending');
 
             // Create the order items.
             if (is_array($items) && $items) {
@@ -204,63 +216,39 @@ class Order extends Model
                 $charge = null;
             }
 
-            try {
-                // Create the route plan.
+            // Create the route plan if both pickup and delivery addresses are available.
+            $segments = [];
+            if ($pickup_address && $delivery_address) {
                 $routes = Courier::ship($order->getAttributes(), $pickup_address->getAttributes(), $delivery_address->getAttributes());
 
-                // We're unable to come up with a route plan.
-                // Accept the order but flag it.
-                if (!$routes) {
-                    throw new \Exception('Unable to determine route plan.');
-                }
+                // We were able to create a route plan. Create the order segments.
+                // TODO: Move this to a microservice.
+                if ($routes) {
+                    // Create the order segments.
+                    foreach ($routes as $k => $route) {
+                        $segments[$k] = $order->addSegment($route['courier_party_id'], $route['type'], $route['shipping_type'], $route['reference_id'], $route['barcode_format'], $route['pickup_address_id'], $route['delivery_address_id'], $route['start_date'], $route['end_date'], $route['currency_id'], $route['amount']);
+                    }
 
-                // Add the routes/segments to the order.
-                // Create the order segments.
-                $order_segments = [];
-                foreach ($routes as $k => $route) {
-                    $order_segments[$k] = $order->addSegment($route['courier_party_id'], $route['type'], $route['shipping_type'], $route['reference_id'], $route['barcode_format'], $route['pickup_address_id'], $route['delivery_address_id'], $route['start_date'], $route['end_date'], $route['currency_id'], $route['amount']);
-                    $order_segments[$k]['courier'] = $route['courier'];
-                    $order_segments[$k]['type'] = $route['type'];
-                    $order_segments[$k]['barcode_format'] = $route['barcode_format'];
-                    $order_segments[$k]['currency'] = $route['currency'];
-                    $order_segments[$k]['active'] = ($k == 0) ? true : false;
-                    $order_segments[$k]['pickup_address'] = $route['pickup_address'];
-                    $order_segments[$k]['delivery_address'] = $route['delivery_address'];
-                    $order_segments[$k]['tat'] = [
-                        'start_date' => $route['start_date'],
-                        'end_date' => $route['end_date'],
-                    ];
-                }
+                    // Set the active segment to be the first route.
+                    $order->setActiveSegment($segments[0]->id);
 
-                // Set the active segment to be the first route.
-                $order->setActiveSegment($order_segments[0]->id);
-
-                // Log the pending status.
-                $order->addEvent('pending');
-
-                // The order is ready for pick up.
-                $order->forPickup();
-            } catch (\Exception $e) {
-                $order_segments = [];
-                if (isset($e->validator)) {
-                    // There was a validation error.
-                    throw $e;
+                    // The order is ready for pick up.
+                    $order->forPickup();
                 } else {
-                    // Flag the order.
+                    // We were unable to determine a route plan.
+                    // Accept the order but flag it.
                     $order->flag();
                 }
             }
 
+            // Add the relations.
+            $order->items = $order_items;
+            $order->charge = $charge;
+            $order->segments = $segments;
+
             // Commit and return the order.
             DB::commit();
-            return [
-                'order' => $order,
-                'pickup_address' => $pickup_address,
-                'delivery_address' => $delivery_address,
-                'order_items' => $order_items,
-                'charge' => $charge,
-                'order_segments' => $order_segments
-            ];
+            return $order;
         } catch (\Exception $e) {
             // Rollback and return the error.
             DB::rollback();
@@ -289,7 +277,7 @@ class Order extends Model
 
             if ($this->pickup_address_id) {
                 // Update the pickup address.
-                $this->pickupAddress()->first()->updateAddress('pickup', array_get($pickup_address, 'name'), array_get($pickup_address, 'line_1'), array_get($pickup_address, 'line_2'), array_get($pickup_address, 'city'), array_get($pickup_address, 'state'), array_get($pickup_address, 'postal_code'), array_get($pickup_address, 'country'), array_get($pickup_address, 'remarks'), array_get($pickup_address, 'title'), array_get($pickup_address, 'email'), array_get($pickup_address, 'phone_number'), array_get($pickup_address, 'mobile_number'), array_get($pickup_address, 'fax_number'), array_get($pickup_address, 'company'));
+                $pickup_address = $this->pickupAddress()->first()->updateAddress('pickup', array_get($pickup_address, 'name'), array_get($pickup_address, 'line_1'), array_get($pickup_address, 'line_2'), array_get($pickup_address, 'city'), array_get($pickup_address, 'state'), array_get($pickup_address, 'postal_code'), array_get($pickup_address, 'country'), array_get($pickup_address, 'remarks'), array_get($pickup_address, 'title'), array_get($pickup_address, 'email'), array_get($pickup_address, 'phone_number'), array_get($pickup_address, 'mobile_number'), array_get($pickup_address, 'fax_number'), array_get($pickup_address, 'company'));
             } else {
                 // Create the pickup address.
                 $pickup_address = Address::store($this->party_id, 'pickup', array_get($pickup_address, 'name'), array_get($pickup_address, 'line_1'), array_get($pickup_address, 'line_2'), array_get($pickup_address, 'city'), array_get($pickup_address, 'state'), array_get($pickup_address, 'postal_code'), array_get($pickup_address, 'country'), array_get($pickup_address, 'remarks'), array_get($pickup_address, 'created_by'), array_get($pickup_address, 'title'), array_get($pickup_address, 'email'), array_get($pickup_address, 'phone_number'), array_get($pickup_address, 'mobile_number'), array_get($pickup_address, 'fax_number'), array_get($pickup_address, 'company'));
@@ -300,7 +288,7 @@ class Order extends Model
 
             if ($this->delivery_address_id) {
                 // Update the delivery address.
-                $this->deliveryAddress()->first()->updateAddress('delivery', array_get($delivery_address, 'name'), array_get($delivery_address, 'line_1'), array_get($delivery_address, 'line_2'), array_get($delivery_address, 'city'), array_get($delivery_address, 'state'), array_get($delivery_address, 'postal_code'), array_get($delivery_address, 'country'), array_get($delivery_address, 'remarks'), array_get($delivery_address, 'title'), array_get($delivery_address, 'email'), array_get($delivery_address, 'phone_number'), array_get($delivery_address, 'mobile_number'), array_get($delivery_address, 'fax_number'), array_get($delivery_address, 'company'));
+                $delivery_address = $this->deliveryAddress()->first()->updateAddress('delivery', array_get($delivery_address, 'name'), array_get($delivery_address, 'line_1'), array_get($delivery_address, 'line_2'), array_get($delivery_address, 'city'), array_get($delivery_address, 'state'), array_get($delivery_address, 'postal_code'), array_get($delivery_address, 'country'), array_get($delivery_address, 'remarks'), array_get($delivery_address, 'title'), array_get($delivery_address, 'email'), array_get($delivery_address, 'phone_number'), array_get($delivery_address, 'mobile_number'), array_get($delivery_address, 'fax_number'), array_get($delivery_address, 'company'));
             } else {
                 // Create the destination address.
                 $delivery_address = Address::store($party_id, 'delivery', array_get($delivery_address, 'name'), array_get($delivery_address, 'line_1'), array_get($delivery_address, 'line_2'), array_get($delivery_address, 'city'), array_get($delivery_address, 'state'), array_get($delivery_address, 'postal_code'), array_get($delivery_address, 'country'), array_get($delivery_address, 'remarks'), array_get($delivery_address, 'created_by'), array_get($delivery_address, 'title'), array_get($delivery_address, 'email'), array_get($delivery_address, 'phone_number'), array_get($delivery_address, 'mobile_number'), array_get($delivery_address, 'fax_number'), array_get($delivery_address, 'company'));
@@ -326,94 +314,49 @@ class Order extends Model
             $this->remarks = $remarks;
 
             // Update the record.
-            $result = $this->save();
-            DB::commit();
-            return $result;
+            $this->save();
 
+            // Update the route plan if both pickup and delivery addresses are available.
+            // TODO: Move this to a microservice.
+            $segments = [];
+            if ($pickup_address && $delivery_address) {
+                // Remove the active segment.
+                $this->setActiveSegment(null);
+
+                // Delete the old routes.
+                $this->deleteSegments();
+
+                // Generate the new route plan.
+                $routes = Courier::ship($this->getAttributes(), $pickup_address->getAttributes(), $delivery_address->getAttributes());
+
+                // We were able to create a route plan.
+                if ($routes) {
+                    // Create the order segments.
+                    foreach ($routes as $k => $route) {
+                        $segments[$k] = $this->addSegment($route['courier_party_id'], $route['type'], $route['shipping_type'], $route['reference_id'], $route['barcode_format'], $route['pickup_address_id'], $route['delivery_address_id'], $route['start_date'], $route['end_date'], $route['currency_id'], $route['amount']);
+                    }
+
+                    // Set the active segment to be the first route.
+                    $this->setActiveSegment($segments[0]->id);
+                } else {
+                    // We were unable to determine a route plan. Flag the order.
+                    $this->flag();
+                }
+            }
+
+            // Add the relations.
+            $this->segments = $segments;
+
+            // Commit and return the updated order.
+            DB::commit();
+            return $this;
         } catch (\Exception $e) {
             // Rollback and return the error.
             DB::rollback();
             throw $e;
         }
     }
-
-    /**
-     * Validates the the shipping orders and assigns a tracking number for asynchronous processing.
-     */
-    public static function prepare($party_id, $order, $currencies, $countries)
-    {
-        // Add the organization ID to the order.
-        $order['party_id'] = $party_id;
-
-        // Determine the currency ID.
-        $order['currency_id'] = array_get($currencies, array_get($order, 'currency', config('settings.defaults.currency')));
-
-        if (!$order['currency_id']) {
-            throw new \Exception('The provided currency code is not valid.', 422);
-        }
-
-        // Determine the country ID of the pickup address.
-        $order['pickup_address']['location_id'] = array_get($countries, array_get($order, 'pickup_address.country'));
-
-        if (!$order['pickup_address']['location_id']) {
-            throw new \Exception('The provided country code ' . array_get($order, 'pickup_address.country') . ' for the pickup address is not valid.', 422);
-        }
-
-        // Determine the country ID of the delivery address.
-        $order['delivery_address']['location_id'] = array_get($countries, array_get($order, 'delivery_address.country'));
-
-        if (!$order['delivery_address']['location_id']) {
-            throw new \Exception('The provided country code ' .  array_get($order, 'delivery_address.country'). ' for the delivery address is not valid.', 422);
-        }
-
-        // Hash the addresses.
-        $order['pickup_address']['hash'] = Address::hash($order['pickup_address']);
-        $order['delivery_address']['hash'] = Address::hash($order['delivery_address']);
-
-        // Round off the amount.
-        $order['amount'] = round($order['amount'], 2);
-
-        // Get the total breakdown and merge it with the order.
-        $order = array_merge($order, self::getTotalBreakDown(array_get($order, 'items'), $order['amount']));
-
-        // Encode the metadata.
-        $order['metadata'] = array_get($order, 'metadata');
-        $order['metadata'] = ($order['metadata']) ? json_encode($order['metadata']) : null;
-
-        // Validate the order.
-        $model = new self($order);
-        $rules = array_except($model->getRules(), ['party_id', 'currency_id', 'pickup_address_id', 'delivery_address_id']);
-        $model->validate(null, $rules);
-
-        // Decode the metadata.
-        $order['metadata'] = json_decode($order['metadata']);
-
-        // Validate the pickup address.
-        $model = new Address;
-        $rules = array_except($model->getRules(), ['party_id', 'location_id']);
-        $model->fill($order['pickup_address'])->validate(null, $rules);
-        $model->fill($order['delivery_address'])->validate(null, $rules);
-
-        // Validate the order items.
-        if (isset($order['items']) && $order['items']) {
-            foreach ($order['items'] as $k => $item) {
-                // Encode the metadata.
-                $item['metadata'] = array_get($item, 'metadata');
-                $item['metadata'] = ($item['metadata']) ? json_encode($item['metadata']) : null;
-
-                // Validate the item.
-                $model = new OrderItem($item);
-                $rules = array_except($model->getRules(), ['order_id', 'total']);
-                $model->validate(null, $rules);
-            }
-        }
-
-        // Generate an order ID and tracking number.
-        $order['id'] = self::getNextId();
-        $order['tracking_number'] = self::getTrackingNumber($order['id']);
-        return $order;
-    }
-
+    
     /**
      * Creates a new charge.
      */
@@ -454,6 +397,14 @@ class Order extends Model
         // Update the active segment.
         $this->active_segment_id = $segment_id;
         return $this->save();
+    }
+
+    /**
+     * Deletes the order segemnts.
+     */
+    public function deleteSegments()
+    {
+        return DB::table('consumer.order_segments')->where('order_id', $this->id)->delete();
     }
 
     /**

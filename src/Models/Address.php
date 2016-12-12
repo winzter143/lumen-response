@@ -146,7 +146,8 @@ class Address extends Model
         $attributes['hash'] = self::hash($attributes);
 
         // Update the address.
-        return $this->update($attributes);
+        $this->update($attributes);
+        return $this;
     }
 
     /**
