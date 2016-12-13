@@ -127,7 +127,7 @@ class Order extends Model
     /**
      * Creates a new order.
      */
-    public static function store($party_id, $pickup_address, $delivery_address, $buyer_name, $email, $contact_number, $grand_total, $payment_method, $payment_provider, $reference_id, $total_collected = 0, $items = [], $currency = 'PHP', $metadata = null, $preferred_pickup_time = null, $preferred_delivery_time = null, $ip_address = null)
+    public static function store($party_id, $pickup_address, $delivery_address, $buyer_name, $email, $contact_number, $grand_total, $payment_method, $payment_provider, $reference_id, $total_collected = 0, $items = [], $currency = 'PHP', $status = 'pending', $metadata = null, $preferred_pickup_time = null, $preferred_delivery_time = null, $ip_address = null)
     {
         try {
             // Start the transaction.
@@ -181,6 +181,7 @@ class Order extends Model
                 'payment_method' => $payment_method,
                 'payment_provider' => $payment_provider,
                 'reference_id' => $reference_id,
+                'status' => $status,
                 'metadata' => $metadata,
                 'preferred_pickup_time' => $preferred_pickup_time,
                 'preferred_delivery_time' => $preferred_delivery_time,
@@ -233,7 +234,9 @@ class Order extends Model
                     $order->setActiveSegment($segments[0]->id);
 
                     // The order is ready for pick up.
-                    $order->forPickup();
+                    if ($status == 'pending') {
+                        $order->forPickup();
+                    }
                 } else {
                     // We were unable to determine a route plan.
                     // Accept the order but flag it.
