@@ -185,7 +185,8 @@ class Order extends Model
                 'metadata' => $metadata,
                 'preferred_pickup_time' => $preferred_pickup_time,
                 'preferred_delivery_time' => $preferred_delivery_time,
-                'ip_address' => $ip_address
+                'ip_address' => $ip_address,
+                'status_updated_at' => DB::raw('now()')
             ]);
 
             // Create the order.
