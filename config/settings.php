@@ -125,9 +125,9 @@ return [
     ],
     'pdf' => array(
         'enabled' => true,
-        'binary'  => '/usr/local/bin/wkhtmltopdf --print-media-type --lowquality',
+        'binary'  => '/usr/local/bin/wkhtmltopdf --print-media-type --lowquality --margin-top 3mm --margin-right 0mm --margin-bottom 0mm --margin-left 3mm',
         'timeout' => false,
-        'options' => array('margin-top'=> '3mm', 'margin-right'=> '0mm', 'margin-bottom'=> '0mm', 'margin-left'=> '3mm'),
+        //'options' => array('margin-top'=> '3mm', 'margin-right'=> '0mm', 'margin-bottom'=> '0mm', 'margin-left'=> '3mm'),
         'env'     => array(),
     ),
     'image' => array(
