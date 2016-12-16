@@ -32,8 +32,8 @@ class UsersSeeder extends Seeder
         'login_id' => 'jbpalmos@lbcexpress.com',
         'email' => 'jbpalmos@lbcexpress.com',
         'password' => 'oms123',
-        'first_name' => 'John Paul B. Palmos',
-        'last_name' => 'John Paul B. Palmos',
+        'first_name' => 'John Paul',
+        'last_name' => 'Palmos',
         'roles' => ['oms'],
         'relationships' => [
             'employee_of' => 'LBCX'
@@ -42,8 +42,8 @@ class UsersSeeder extends Seeder
         'login_id' => 'jstorres@lbcexpress.com',
         'email' => 'jstorres@lbcexpress.com',
         'password' => 'oms123',
-        'first_name' => 'Joshua S. Torres',
-        'last_name' => 'Joshua S. Torres',
+        'first_name' => 'Joshua',
+        'last_name' => 'Torres',
         'roles' => ['oms'],
         'relationships' => [
             'employee_of' => 'LBCX'
@@ -52,8 +52,8 @@ class UsersSeeder extends Seeder
         'login_id' => 'mbbacud@lbcexpress.com',
         'email' => 'mbbacud@lbcexpress.com',
         'password' => 'oms123',
-        'first_name' => 'Marie Joanne B. Bacud',
-        'last_name' => 'Marie Joanne B. Bacud',
+        'first_name' => 'Marie Joanne',
+        'last_name' => 'Bacud',
         'roles' => ['oms'],
         'relationships' => [
             'employee_of' => 'LBCX'
@@ -62,8 +62,8 @@ class UsersSeeder extends Seeder
         'login_id' => 'ecbesa@lbcexpress.com',
         'email' => 'ecbesa@lbcexpress.com',
         'password' => 'oms123',
-        'first_name' => 'Earlbert C. Besa',
-        'last_name' => 'Earlbert C. Besa',
+        'first_name' => 'Earlbert',
+        'last_name' => 'Besa',
         'roles' => ['oms'],
         'relationships' => [
             'employee_of' => 'LBCX'
@@ -72,8 +72,8 @@ class UsersSeeder extends Seeder
         'login_id' => 'appalanca@lbcexpress.com',
         'email' => 'appalanca@lbcexpress.com',
         'password' => 'oms123',
-        'first_name' => 'Alejandro John P. Palanca',
-        'last_name' => 'Alejandro John P. Palanca',
+        'first_name' => 'Alejandro John',
+        'last_name' => 'Palanca',
         'roles' => ['oms'],
         'relationships' => [
             'employee_of' => 'LBCX'
@@ -82,8 +82,8 @@ class UsersSeeder extends Seeder
         'login_id' => 'cdelmundo@lbcx.ph',
         'email' => 'cdelmundo@lbcx.ph',
         'password' => 'oms123',
-        'first_name' => 'Ma. Cecilia Cordero-del Mundo',
-        'last_name' => 'Ma. Cecilia Cordero-del Mundo',
+        'first_name' => 'Ma. Cecilia',
+        'last_name' => 'Cordero-del Mundo',
         'roles' => ['oms'],
         'relationships' => [
             'employee_of' => 'LBCX'
@@ -92,8 +92,8 @@ class UsersSeeder extends Seeder
         'login_id' => 'jettmarana@lbcx.ph',
         'email' => 'jettmarana@lbcx.ph',
         'password' => 'oms123',
-        'first_name' => 'Jett Marana',
-        'last_name' => 'Jett Marana',
+        'first_name' => 'Jett',
+        'last_name' => 'Marana',
         'roles' => ['oms'],
         'relationships' => [
             'employee_of' => 'LBCX'
