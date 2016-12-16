@@ -145,9 +145,18 @@ class Address extends Model
         // Hash the address.
         $attributes['hash'] = self::hash($attributes);
 
-        // Update the address.
-        $this->update($attributes);
-        return $this;
+        // Check if the address exists.
+        $address = self::where(['party_id' => $this->party_id, 'hash' => $attributes['hash']])->first();
+
+        if ($address) {
+            // Update the fields that are not included in the address hash.
+            $address->update(['title' => $attributes['title'], 'fax_number' => $attributes['fax_number'], 'remarks' => $attributes['remarks']]);
+            return $address;
+        } else {
+            // Update the address.
+            $this->update($attributes);
+            return $this;
+        }
     }
 
     /**
