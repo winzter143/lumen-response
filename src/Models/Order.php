@@ -408,7 +408,29 @@ class Order extends Model
      */
     public function deleteSegments()
     {
-        return DB::table('consumer.order_segments')->where('order_id', $this->id)->delete();
+        try {
+            // Start the transaction.
+            DB::beginTransaction();
+
+            // Fetch the segment IDs.
+            $ids = DB::table('consumer.order_segments')->where('order_id', $this->id)->pluck('id');
+
+            if ($ids) {
+                // Delete the order events.
+                DB::table('consumer.order_events')->whereIn('order_segment_id', $ids)->delete();
+
+                // Delete the segments.
+                DB::table('consumer.order_segments')->whereIn('id', $ids)->delete();
+            }
+
+            // Commit.
+            DB::commit();
+            return true;
+        } catch (\Exception $e) {
+            // Rollback and return the error.
+            DB::rollback();
+            throw $e;
+        }
     }
 
     /**
