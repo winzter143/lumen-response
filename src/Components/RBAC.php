@@ -76,7 +76,11 @@ trait RBAC
         if (in_array('manage-party', $user_roles)) {
             $can_view_party = true;
         } else {
-            $can_view_party = ($this->party_id == $party_id);
+            // Convert party_id to array.
+            $party_id = is_array($party_id) ? $party_id : [$party_id];
+
+            // Check if the party IDs are the same.
+            $can_view_party = !array_diff($party_id, [$this->party_id]);
         }
 
         // Check if the user has the permission and can view the party.
