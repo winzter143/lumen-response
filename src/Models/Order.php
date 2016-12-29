@@ -133,6 +133,9 @@ class Order extends Model
             // Start the transaction.
             DB::beginTransaction();
 
+            // Get the party contract.
+            $contract = Party::getContract($party_id);
+
             // Look for the currency ID.
             $currency_id = DB::table('core.currencies')->where('code', $currency)->value('id');
 
@@ -211,11 +214,17 @@ class Order extends Model
                 throw new \Exception('At least one order item of type "product" is required.', 422);
             }
 
-            // Create a charge if the COD flag is set.
-            if ($order->payment_method == 'cod') {
+            // Create the charge object.
+            if ($contract['fuse_client']) {
+                // The client used our payment gateway. Create the charge object.
                 $charge = $order->createCharge();
             } else {
-                $charge = null;
+                // Create a charge object only if the payment method is COD.
+                if ($order->payment_method == 'cod') {
+                    $charge = $order->createCharge();
+                } else {
+                    $charge = null;
+                }
             }
 
             // Create the route plan if both pickup and delivery addresses are available.
@@ -364,9 +373,9 @@ class Order extends Model
     /**
      * Creates a new charge.
      */
-    public function createCharge()
+    public function createCharge($status = 'pending')
     {
-        return Charge::store($this->id, $this->grand_total, $this->payment_method);
+        return Charge::store($this->id, $this->grand_total, $this->payment_method, $status);
     }
 
     /**
@@ -801,14 +810,8 @@ class Order extends Model
      */
     public function retryPickup($remarks = null)
     {
-        // Get the default contract.
-        $default = config('settings.defaults.contract');
-
         // Get the client contract.
-        $contract = Party::getMetaData($this->party_id, 'contract');
-
-        // Set the default values.
-        $contract = is_array($contract) ? array_merge($default, $contract) : $default;
+        $contract = Party::getContract($this->party_id);
 
         if (is_null($contract['pickup_retries'])) {
             // There is no limit.
@@ -885,12 +888,8 @@ class Order extends Model
      */
     public static function getFees($party_id, $grand_total, $delivery_address, $payment_method)
     {
-        // Get the default contract.
-        $default = config('settings.defaults.contract');
-
         // Fetch the client contract.
-        $contract = Party::getMetaData($party_id, 'contract');
-        $contract = __is_array_associative($contract) ? array_merge($default, $contract) : $default;
+        $contract = Party::getContract($party_id);
 
         // Determine the shipping fee.
         $fees['shipping_fee'] = Address::isProvincial($delivery_address->getAttributes()) ? $contract['shipping_fee']['provincial'] : $contract['shipping_fee']['manila'];
