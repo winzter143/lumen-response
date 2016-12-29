@@ -697,11 +697,49 @@ class Order extends Model
     }
 
     /**
+     * Sets the order status to "confirmed".
+     */
+    public function confirmed($remarks = null)
+    {
+        try {
+            // Start the transaction.
+            DB::beginTransaction();
+
+            // Set the status.
+            $this->setStatus('confirmed', $remarks);
+
+            // Get the charge object.
+            $charge = $this->charge()->first();
+
+            if ($charge) {
+                // Set the charge object to paid.
+                $charge->paid($this->grand_total);
+            }
+
+            // Commit.
+            DB::commit();
+            return $this;
+        } catch (\Exception $e) {
+            // Rollback and return the error.
+            DB::rollback();
+            throw $e;
+        }
+    }
+
+    /**
      * Sets the order status to "return_in_transit".
      */
     public function returnInTransit($remarks = null)
     {
         return $this->setStatus('return_in_transit', $remarks);
+    }
+
+    /**
+     * Sets the order status to "canceled".
+     */
+    public function canceled($remarks = null)
+    {
+        return $this->setStatus('canceled', $remarks);
     }
 
     /**
