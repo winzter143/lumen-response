@@ -661,7 +661,7 @@ class Order extends Model
             $this->setStatus('delivered', $remarks);
 
             // Get the charge object.
-            $charge = $this->charge()->first();
+            $charge = $this->charge;
 
             // Transfer the fees from the client's fund wallet to the system's sales wallet.
             $this->transferSale($ip_address);
@@ -680,9 +680,9 @@ class Order extends Model
                 $charge->paid($this->grand_total, 0, null);
             }
 
-            // Transfers the total from the system's collection wallet to the client's fund wallet.
-            if ($charge && $charge->status == 'paid') {
-                $this->transferFunds($ip_address);
+            // Transfer the total from the system's collection wallet to the client's fund wallet.
+            if ($charge) {
+                $charge->transferFunds($ip_address);
             }
 
             // Commit.
@@ -832,7 +832,24 @@ class Order extends Model
      */
     public function claimOrder($amount, $reason, $assets = null, $shipping_fee_flag = 0, $insurance_fee_flag = 0, $transaction_fee_flag = 0, $remarks = null, $status = 'pending', $reference_id = null, array $created_by = [])
     {
-        return Claim::store($this->id, $amount, $reason, $assets, $shipping_fee_flag, $insurance_fee_flag, $transaction_fee_flag, $remarks, $status, $reference_id, $created_by);
+        try {
+            // Start the transaction.
+            DB::beginTransaction();
+
+            // Create the claim object.
+            $claim = Claim::store($this->id, $amount, $reason, $assets, $shipping_fee_flag, $insurance_fee_flag, $transaction_fee_flag, $remarks, $status, $reference_id, $created_by);
+
+            // Set the order status to claimed.
+            $this->claimed();
+
+            // Commit.
+            DB::commit();
+            return $claim;
+        } catch (\Exception $e) {
+            // Rollback and return the error.
+            DB::rollback();
+            throw $e;
+        }
     }
 
     /**
@@ -942,8 +959,9 @@ class Order extends Model
 
     /**
      * Transfer the shipping fee, insurance fee, and transaction fee from the client's fund wallet to the system's sales wallet.
+     * @param string $ip_address Client's IP address
      */
-    private function transferSale($ip_address)
+    public function transferSale($ip_address)
     {
         // Compute for the transfer amount.
         $amount = $this->shipping_fee + $this->insurance_fee + $this->transaction_fee;
@@ -956,21 +974,10 @@ class Order extends Model
     }
 
     /**
-     * Transfers the total order amount from the system's collection wallet to the client's fund wallet.
+     * Transfers the funds from the client's fund wallet to the system's sales wallet.
+     * @param string $ip_address Client's IP address
      */
-    private function transferFunds($ip_address)
-    {
-        // Add the tracking number to the description.
-        $details = 'Funds for COD order #' . $this->tracking_number;
-
-        // Transfer the total from the system's collection wallet to the client's fund wallet.
-        return Wallet::transfer(config('settings.system_party_id'), $this->party_id, 'collections', 'fund', $this->currency->code, $this->grand_total, 'fund', $details, $this->id, $ip_address);
-    }
-
-    /**
-     * Transfera the funds from the client's fund wallet to the system's sales wallet.
-     */
-    private function transferReturn($ip_address)
+    public function transferReturn($ip_address)
     {
         // We transfer twice the shipping fee plus insurance fee.
         $amount = ($this->shipping_fee * 2) + $this->insurance_fee;

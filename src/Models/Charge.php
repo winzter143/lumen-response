@@ -30,7 +30,7 @@ class Charge extends Model
     {
         return [
             'order_id' => 'integer|required|exists:pgsql.consumer.orders,id',
-            'status' => 'string|required|in:pending,assigned,paid,remitted,paid_out',
+            'status' => 'string|required|in:pending,assigned,paid,remitted,paid_out,refunded',
             'payment_method' => 'string|required|in:' . implode(',', array_keys(config('settings.payment_methods'))),
             'collector_party_id' => 'integer|nullable|exists:pgsql.core.parties,id',
             'deposit_id' => 'integer|nullable|exists:pgsql.consumer.deposits,id',
@@ -77,6 +77,36 @@ class Charge extends Model
     }
 
     /**
+     * Sets the the charge status to "refunded".
+     */
+    public function refunded($amount, $ip_address)
+    {
+        try {
+            // Start the transaction.
+            DB::beginTransaction();
+
+            if ($this->status != 'paid') {
+                throw new Exception('The order has not been paid for yet.', 422);
+            }
+
+            // Update the status.
+            $this->status = 'refunded';
+            $this->save();
+
+            // Transfer the claim amount to the client.
+            $this->transferClaim($amount, $ip_address);
+
+            // Commit.
+            DB::commit();
+            return $this;
+        } catch (\Exception $e) {
+            // Rollback and return the error.
+            DB::rollback();
+            throw $e;
+        }
+    }
+
+    /**
      * Creates a new order.
      */
     public static function store($order_id, $total_amount, $payment_method = null, $status = 'pending', $tendered_amount = 0, $change_amount = 0, $remarks = null, $collector_party_id = null, $deposit_id = null, $updated_by = null)
@@ -103,5 +133,37 @@ class Charge extends Model
             DB::rollback();
             throw $e;
         }
+    }
+
+    /**
+     * Transfers the total order amount from the system's collection wallet to the client's fund wallet.
+     * @param string $ip_address Client's IP address
+     */
+    public function transferFunds($ip_address)
+    {
+        // Check if the order has been paid for.
+        if (!$this->status == 'paid') {
+            throw new \Exception('The order has not yet been paid for.', 422);
+        }
+
+        // Add the tracking number to the description.
+        $details = 'Funds for COD order #' . $this->order->tracking_number;
+
+        // Transfer the total from the system's collection wallet to the client's fund wallet.
+        return Wallet::transfer(config('settings.system_party_id'), $this->order->party_id, 'collections', 'fund', $this->order->currency->code, $this->total_amount, 'fund', $details, $this->order_id, $ip_address);
+    }
+
+    /**
+     * Transfers the claim amount, shipping, insurance, and transaction fees from the system's sales wallet to the client's fund wallet.
+     * @param string $ip_address Client's IP address
+     * @param bool $shipping_fee_flag Shipping fee flag. If set to true, shipping fee will be transferred back to the client.
+     * @param bool $insurance_fee_flag Insurance fee flag. If set to true, insurance fee will be transferred back to the client.
+     * @param bool $transaction_fee_flag Transaction fee flag. If set to true, transaction fee will be transferred back to the client.
+     */
+    public function transferClaim($amount, $ip_address)
+    {
+        // Add the tracking number to the description.
+        $details = 'Claim for order #' . $this->order->tracking_number;
+        return Wallet::transfer(config('settings.system_party_id'), $this->order->party_id, 'sales', 'fund', $this->order->currency->code, $amount, 'claim', $details, $this->order_id, $ip_address);
     }
 }

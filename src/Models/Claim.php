@@ -208,9 +208,6 @@ class Claim extends Model
             // Start the transaction.
             DB::beginTransaction();
 
-            // Update the status.
-            $this->setStatus('verified');
-
             // Determine the amount to be transferred back to the client.
             $amount = $this->amount;
 
@@ -226,10 +223,14 @@ class Claim extends Model
                 $amount += $this->order->transaction_fee;
             }
 
-            // Transfer the claim amount, shipping, insurance, and transaction fees from the system's sales wallet to the client's fund wallet.
-            $details = 'Claim for order #' . $this->order->tracking_number;
-            Wallet::transfer(config('settings.system_party_id'), $this->order->party_id, 'sales', 'fund', $this->order->currency->code, $amount, 'claim', $details, $this->order_id, $ip_address);
+            // Update the status.
+            $this->setStatus('verified');
 
+            // Mark the charge as refunded.
+            if ($this->order->charge) {
+                $this->order->charge->refunded($amount, $ip_address);
+            }
+            
             // Commit.
             DB::commit();
             return $this;
