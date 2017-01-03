@@ -139,7 +139,7 @@ class Charge extends Model
      * Transfers the total order amount from the system's collection wallet to the client's fund wallet.
      * @param string $ip_address Client's IP address
      */
-    public function transferFunds($ip_address)
+    public function transferCollection($ip_address)
     {
         // Check if the order has been paid for.
         if (!$this->status == 'paid') {
@@ -150,7 +150,7 @@ class Charge extends Model
         $details = 'Funds for COD order #' . $this->order->tracking_number;
 
         // Transfer the total from the system's collection wallet to the client's fund wallet.
-        return Wallet::transfer(config('settings.system_party_id'), $this->order->party_id, 'collections', 'fund', $this->order->currency->code, $this->total_amount, 'fund', $details, $this->order_id, $ip_address);
+        return Wallet::transfer(config('settings.system_party_id'), $this->order->party_id, 'collections', 'fund', $this->order->currency->code, $this->total_amount, 'collection', $details, $this->order_id, $ip_address);
     }
 
     /**

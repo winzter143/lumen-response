@@ -682,7 +682,7 @@ class Order extends Model
 
             // Transfer the total from the system's collection wallet to the client's fund wallet.
             if ($charge) {
-                $charge->transferFunds($ip_address);
+                $charge->transferCollection($ip_address);
             }
 
             // Commit.
