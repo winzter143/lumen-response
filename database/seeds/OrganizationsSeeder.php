@@ -211,6 +211,78 @@ class OrganizationsSeeder extends Seeder
         'relationships' => [
             'department_of' => 'LBC'
         ]
+    ], [
+        'name' => 'Stores Specialists Incorporated',
+        'role' => 'client',
+        'metadata' => null,
+        'wallets' => [
+            'fund' => [
+                'currency' => 'PHP',
+                'amount' => 0,
+                'credit_limit' => 0,
+                'max_limit' => null
+            ],
+            'settlement' => [
+                'currency' => 'PHP',
+                'amount' => 0,
+                'credit_limit' => 0,
+                'max_limit' => null
+            ]
+        ]
+    ], [
+        'name' => 'Adidas',
+        'role' => 'client',
+        'metadata' => null,
+        'wallets' => [
+            'fund' => [
+                'currency' => 'PHP',
+                'amount' => 0,
+                'credit_limit' => 0,
+                'max_limit' => null
+            ],
+            'settlement' => [
+                'currency' => 'PHP',
+                'amount' => 0,
+                'credit_limit' => 0,
+                'max_limit' => null
+            ]
+        ]
+    ], [
+        'name' => 'Go Easy Ship',
+        'role' => 'client',
+        'metadata' => null,
+        'wallets' => [
+            'fund' => [
+                'currency' => 'PHP',
+                'amount' => 0,
+                'credit_limit' => 0,
+                'max_limit' => null
+            ],
+            'settlement' => [
+                'currency' => 'PHP',
+                'amount' => 0,
+                'credit_limit' => 0,
+                'max_limit' => null
+            ]
+        ]
+    ], [
+        'name' => 'TackThis',
+        'role' => 'client',
+        'metadata' => null,
+        'wallets' => [
+            'fund' => [
+                'currency' => 'PHP',
+                'amount' => 0,
+                'credit_limit' => 0,
+                'max_limit' => null
+            ],
+            'settlement' => [
+                'currency' => 'PHP',
+                'amount' => 0,
+                'credit_limit' => 0,
+                'max_limit' => null
+            ]
+        ]
     ]];
 
     /**
