@@ -150,6 +150,20 @@ class Party extends Model
     }
 
     /**
+     * Returns the party contract.
+     * @param int $party_id
+     */
+    public static function getContract($party_id)
+    {
+        // Get the default contract.
+        $default = config('settings.defaults.contract');
+
+        // Get the party contract.
+        $contract = self::getMetaData($party_id, 'contract');
+        return __is_array_associative($contract) ? array_merge($default, $contract) : $default;
+    }
+
+    /**
      * Creates a new party.
      * @param string $type user|organization
      * @param int $status 0|1

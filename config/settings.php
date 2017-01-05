@@ -23,7 +23,10 @@ return [
             ],
             'pickup_retries' => 3,
             // Within 7 days of delivery.
-            'claim_period' => 7
+            'claim_period' => 7,
+            // If set to true, F3 creates and unpaid charge object even for prepaid orders.
+            // Otherwise, F3 creates a charge object for COD orders only.
+            'fuse_client' => false
         ],
         'tracker' => [
             'failures' => 0,
@@ -88,6 +91,8 @@ return [
         'returned' => 'Returned',
         'failed_return' => 'Failed return',
         'out_for_delivery' => 'Out for delivery',
+        'confirmed' => 'Confirmed',
+        'canceled' => 'Canceled',
     ],
     // List of transaction matching statuses.
     'match_statuses' => [
@@ -125,9 +130,9 @@ return [
     ],
     'pdf' => array(
         'enabled' => true,
-        'binary'  => '/usr/local/bin/wkhtmltopdf --print-media-type --lowquality',
+        'binary'  => '/usr/local/bin/wkhtmltopdf --print-media-type --lowquality --margin-top 3mm --margin-right 0mm --margin-bottom 0mm --margin-left 3mm',
         'timeout' => false,
-        'options' => array('margin-top'=> '3mm', 'margin-right'=> '0mm', 'margin-bottom'=> '0mm', 'margin-left'=> '3mm'),
+        //'options' => array('margin-top'=> '3mm', 'margin-right'=> '0mm', 'margin-bottom'=> '0mm', 'margin-left'=> '3mm'),
         'env'     => array(),
     ),
     'image' => array(

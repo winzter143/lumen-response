@@ -28,6 +28,76 @@ class UsersSeeder extends Seeder
         'relationships' => [
             'employee_of' => 'LBCX'
         ]
+    ], [
+        'login_id' => 'jbpalmos@lbcexpress.com',
+        'email' => 'jbpalmos@lbcexpress.com',
+        'password' => 'oms123',
+        'first_name' => 'John Paul',
+        'last_name' => 'Palmos',
+        'roles' => ['oms'],
+        'relationships' => [
+            'employee_of' => 'LBCX'
+        ]
+    ], [
+        'login_id' => 'jstorres@lbcexpress.com',
+        'email' => 'jstorres@lbcexpress.com',
+        'password' => 'oms123',
+        'first_name' => 'Joshua',
+        'last_name' => 'Torres',
+        'roles' => ['oms'],
+        'relationships' => [
+            'employee_of' => 'LBCX'
+        ]
+    ], [
+        'login_id' => 'mbbacud@lbcexpress.com',
+        'email' => 'mbbacud@lbcexpress.com',
+        'password' => 'oms123',
+        'first_name' => 'Marie Joanne',
+        'last_name' => 'Bacud',
+        'roles' => ['oms'],
+        'relationships' => [
+            'employee_of' => 'LBCX'
+        ]
+    ], [
+        'login_id' => 'ecbesa@lbcexpress.com',
+        'email' => 'ecbesa@lbcexpress.com',
+        'password' => 'oms123',
+        'first_name' => 'Earlbert',
+        'last_name' => 'Besa',
+        'roles' => ['oms'],
+        'relationships' => [
+            'employee_of' => 'LBCX'
+        ]
+    ], [
+        'login_id' => 'appalanca@lbcexpress.com',
+        'email' => 'appalanca@lbcexpress.com',
+        'password' => 'oms123',
+        'first_name' => 'Alejandro John',
+        'last_name' => 'Palanca',
+        'roles' => ['oms'],
+        'relationships' => [
+            'employee_of' => 'LBCX'
+        ]
+    ], [
+        'login_id' => 'cdelmundo@lbcx.ph',
+        'email' => 'cdelmundo@lbcx.ph',
+        'password' => 'oms123',
+        'first_name' => 'Ma. Cecilia',
+        'last_name' => 'Cordero-del Mundo',
+        'roles' => ['oms'],
+        'relationships' => [
+            'employee_of' => 'LBCX'
+        ]
+    ], [
+        'login_id' => 'jettmarana@lbcx.ph',
+        'email' => 'jettmarana@lbcx.ph',
+        'password' => 'oms123',
+        'first_name' => 'Jett',
+        'last_name' => 'Marana',
+        'roles' => ['oms'],
+        'relationships' => [
+            'employee_of' => 'LBCX'
+        ]
     ]];
 
     /**

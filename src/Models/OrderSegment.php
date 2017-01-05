@@ -77,8 +77,12 @@ class OrderSegment extends Model
                 'flagged' => $flagged,
             ];
 
-            // Create the charge. 
-            return self::create($attributes);
+            // Create the segment. 
+            $segment = self::create($attributes);
+
+            // Decode tat.
+            $segment->tat = json_decode($segment->tat);
+            return $segment;
         } catch (\Exception $e) {
             // Rollback and return the error.
             throw $e;

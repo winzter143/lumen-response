@@ -30,7 +30,7 @@ class OrderEvent extends Model
     {
         // Set the validation rules.
         $rules = [
-            'order_segment_id' => 'integer|required|exists:pgsql.consumer.order_segments,id',
+            'order_segment_id' => 'integer|nullable|exists:pgsql.consumer.order_segments,id',
             'status' => 'string|in:' . implode(',', array_keys(config('settings.order_statuses')))
         ];
 

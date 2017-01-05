@@ -237,19 +237,6 @@ CREATE TABLE core.banks (
 );
 
 --
--- Table structure for table `banks`
---
-CREATE TABLE core.banks (
-  id SERIAL,
-  name VARCHAR(255) NOT NULL,
-  swift_code VARCHAR(50),
-  phone_number VARCHAR(50),
-  created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (id),
-  CONSTRAINT banks_name_uk UNIQUE (name)
-);
-
---
 -- Table structure for table `bank_accounts`
 --
 CREATE TYPE core.bank_account_type AS ENUM ('savings', 'current');
