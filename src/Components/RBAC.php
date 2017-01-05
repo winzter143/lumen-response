@@ -9,10 +9,37 @@ use DB;
 trait RBAC
 {
     /**
+     * User roles and scope.
+     */
+    private $roles = [];
+    private $scope = [];
+
+    /**
+     * Sets the user roles.
+     */
+    public function setRoles($roles)
+    {
+        $this->roles = $roles;
+    }
+
+    /**
+     * Sets the user scope.
+     */
+    public function setScope($scope)
+    {
+        $this->scope = $scope;
+    }
+
+    /**
      * Returns the roles assigned to the party.
      */
     public function getRoles()
     {
+        // Check if the roles have already been set.
+        if ($this->roles) {
+            return $this->roles;
+        }
+
         // Get the roles.
         $roles = DB::table('core.party_roles as pr')
             ->select('r.name', 'r.permissions')
@@ -30,6 +57,8 @@ trait RBAC
             $roles = [];
         }
 
+        // Set the roles.
+        $this->roles = $roles;
         return $roles;
     }
 
@@ -63,24 +92,40 @@ trait RBAC
      * @param string $permission
      * @param int $party_id
      */
-    public function can($permission, $party_id = null)
+    public function can($permission, $party_id = false)
     {
-        // Get the user roles.
-        $user_roles = array_flatten($this->getRoles());
+        // Get the user permissions.
+        $permissions = array_flatten($this->getRoles());
 
         // Check if the user is assigned the permission.
-        $has_permission = in_array($permission, $user_roles);
+        $has_permission = in_array($permission, $permissions);
 
+        if ($party_id === false) {
+            // No need to check the party.
+            return $has_permission;
+        }
+
+        // Get the scope.
+        $scope = $this->getScope();
+        
         // Check if the user can view any party in the system.
         // "manage-party" is a special role in the system that is assigned only to system users.
-        if (in_array('manage-party', $user_roles)) {
-            $can_view_party = true;
+        if (in_array('manage-party', $permissions)) {
+            $can_manage_party = true;
         } else {
-            $can_view_party = ($this->party_id == $party_id);
+            if (is_null($scope['users'])) {
+                $can_manage_party = true;
+            } else {
+                // Convert party_id to array.
+                $party_id = is_array($party_id) ? $party_id : [$party_id];
+                
+                // Check if the party IDs are the same.
+                $can_manage_party = !array_diff($party_id, $scope['users']);
+            }
         }
 
         // Check if the user has the permission and can view the party.
-        return ($has_permission && $can_view_party);
+        return ($has_permission && $can_manage_party);
     }
 
     /**
@@ -164,5 +209,29 @@ trait RBAC
     public function isOrganization()
     {
         return ($this->getType() == 'organization');
+    }
+
+    /**
+     * Returns the list of entities the party has access to.
+     */
+    public function getScope()
+    {
+        // Check if the scope have already been set.
+        if ($this->scope) {
+            return $this->scope;
+        }
+
+        // Keep it simple for now.
+        // If the user has access to all users if he has the "manage-party" permission.
+        // Otherwise, he can only access his own records.
+        if ($this->can('manage-party')) {
+            $scope['users'] = null;
+        } else {
+            $scope['users'] = [$this->party_id];
+        }
+
+        // Set the scope.
+        $this->scope = $scope;
+        return $scope;
     }
 }
