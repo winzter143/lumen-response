@@ -4,7 +4,6 @@ namespace F3\Middleware;
 use Illuminate\Http\Request;
 use F3\Components\Response;
 use Closure;
-use GuzzleHttp\Client;
 
 class AuthMiddleware
 {
@@ -14,72 +13,39 @@ class AuthMiddleware
      * @param Closure $next
      * @return mixed
      */
-    public function handle(Request $request, Closure $next, $role = null)
+    public function handle(Request $request, Closure $next, $roles = null, $permission = null, $party_param = false, $override_party_param = true)
     {
-        try {
-            if ($request->hasCookie('token')) {
-                // Check if the token is passed as a cookie.
-                $token = $request->cookie('token');
-            } else {
-                // Check if the token is passed using the authorization bearer schema.
-                $token = $request->bearerToken();
+        // Get the user.
+        $user = $request->user();
 
-                if (!$token) {
-                    throw new \Exception('Token not found.', 401);
-                }
+        // Check if the user is assigned the roles.
+        if ($roles) {
+            // Parse the roles.
+            $roles = explode('|', $roles);
+
+            if (!$user->hasRole($roles)) {
+                return Response::error(401, 'You do not have the privilege to access this resource.');
             }
-
-            try {
-                // Validate the token.
-                // Create an HTTP client.
-                $client = new Client;
-
-                // Set up the parameters.
-                $params = [
-                    'token' => $token,
-                    'role' => $role
-                ];
-
-                // Send the request.
-                // The request is considered successful if we get a 200 status code.
-                // Note: only network errors and 4xx-5xx errors will throw an exception so we should still check the status code of the response.
-                // TODO: figure out how to require the environment variable.
-                $response = $client->post(env('F3_BASE_URL') . '/auth/token', ['json' => $params]);
-
-                if ($response->getStatusCode() == 200) {
-                    // Decode the response.
-                    $body = json_decode($response->getBody(), true);
-
-                    // Instantiate the party.
-                    if (isset($body['obo'])) {
-                        // Use the sub-party in the request.
-                        $party = new $body['obo']['class']($body['obo']);
-                    } else {
-                        // Use the principal party in the request.
-                        $party = new $body['party']['class']($body['party']);
-                    }
-                } else {
-                    throw new \Exception($response->getBody(), $response->getStatusCode());
-                }
-            } catch (\Exception $e) {
-                if ($e->getCode() == 401) {
-                    // Get the error message.
-                    $body = json_decode($e->getResponse()->getBody());
-                    throw new \Exception($body->description, 401);
-                } else {
-                    // Something else went wrong.
-                    throw $e;
-                }
-            }
-
-            // Make the party data available to the other controllers.
-            $request->attributes->set('party', $party);
-
-            // Call the next middleware/controller.
-            return $next($request);
-
-        } catch (\Exception $e) {
-            return Response::exception($e);
         }
+
+        // Check if the user has the permission.
+        if ($permission) {
+            if ($party_param) {
+                if (!$user->can($permission, $request->input($party_param))) {
+                    if (filter_var($override_party_param, FILTER_VALIDATE_BOOLEAN)) {
+                        $request->merge([$party_param => $user->party_id]);
+                    } else {
+                        return Response::error(401, 'You do not have the permission to access this resource for the requested parties.');
+                    }
+                }
+            } else {
+                if (!$user->can($permission)) {
+                    return Response::error(401, 'You do not have the permission to access this resource.');
+                }
+            }
+        }
+
+        // Call the next middleware/controller.
+        return $next($request);
     }
 }
