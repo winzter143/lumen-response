@@ -10,22 +10,22 @@ class RolesSeeder extends Seeder
         'admin' => [
             'name' => 'admin',
             'display_name' => 'Administrator',
-            'permissions' => ['create-order', 'view-order', 'view-orders', 'edit-order', 'upload-orders', 'create-claim', 'view-claim', 'view-claims', 'edit-claims', 'view-wallets', 'view-wallet', 'create-bank-account', 'view-bank-accounts', 'view-bank-account', 'edit-bank-account', 'delete-bank-account', 'manage-party'],
+            'permissions' => ['view-overview', 'create-order', 'view-order', 'view-orders', 'edit-order', 'upload-orders', 'create-claim', 'view-claim', 'view-claims', 'edit-claim', 'view-wallets', 'view-wallet', 'create-bank-account', 'view-bank-accounts', 'view-bank-account', 'edit-bank-account', 'delete-bank-account', 'manage-party'],
         ],
         'finance' => [
             'name' => 'finance',
             'display_name' => 'Finance',
-            'permissions' => ['create-order', 'view-order', 'view-orders', 'edit-order', 'upload-orders', 'create-claim', 'view-claim', 'view-claims', 'edit-claims', 'view-wallets', 'view-wallet', 'create-bank-account', 'view-bank-accounts', 'view-bank-account', 'edit-bank-account', 'delete-bank-account', 'manage-party'],
+            'permissions' => ['view-overview', 'create-order', 'view-order', 'view-orders', 'edit-order', 'upload-orders', 'create-claim', 'view-claim', 'view-claims', 'edit-claim', 'view-wallets', 'view-wallet', 'view-transfers', 'view-transfer', 'view-payouts', 'view-payout', 'create-bank-account', 'view-bank-accounts', 'view-bank-account', 'edit-bank-account', 'delete-bank-account', 'manage-party', 'view-transactions', 'view-transaction', 'upload-transactions'],
         ],
         'oms' => [
             'name' => 'oms',
             'display_name' => 'OMS',
-            'permissions' => ['create-order', 'view-order', 'view-orders', 'edit-order', 'upload-orders', 'create-claim', 'view-claim', 'view-claims', 'edit-claims', 'manage-party'],
+            'permissions' => ['view-overview', 'create-order', 'view-order', 'view-orders', 'edit-order', 'upload-orders', 'create-claim', 'view-claim', 'view-claims', 'edit-claim', 'manage-party'],
         ],
         'client' => [
             'name' => 'client',
             'display_name' => 'Client System',
-            'permissions' => ['create-order', 'view-order', 'view-orders', 'edit-order', 'view-wallets', 'view-wallet', 'create-bank-account', 'view-bank-accounts', 'view-bank-account', 'edit-bank-account', 'delete-bank-account', 'view-claims', 'view-claim'],
+            'permissions' => ['create-order', 'view-order', 'view-orders', 'edit-order', 'view-wallets', 'view-wallet', 'view-transfers', 'view-transfer', 'view-payouts', 'view-payout', 'create-bank-account', 'view-bank-accounts', 'view-bank-account', 'edit-bank-account', 'delete-bank-account', 'view-claims', 'view-claim'],
         ],
         'courier' => [
             'name' => 'courier',
