@@ -40,13 +40,14 @@ CREATE TABLE wallet."transfers" (
   "details" text NOT NULL ,
   "ip_address" text ,
   "order_id" integer ,
-  "order_id" integer ,
+  "ledger_id" integer ,
   "created_by" integer ,
   "created_at" timestamp with time zone NOT NULL DEFAULT current_timestamp ,
   PRIMARY KEY ("id") ,
   CONSTRAINT transfers_from_wallet_id_fk FOREIGN KEY (from_wallet_id) REFERENCES wallet.wallets (id) ON DELETE NO ACTION ON UPDATE NO ACTION ,
   CONSTRAINT transfers_to_wallet_id_fk FOREIGN KEY (to_wallet_id) REFERENCES wallet.wallets (id) ON DELETE NO ACTION ON UPDATE NO ACTION ,
-  CONSTRAINT transfers_order_id_fk FOREIGN KEY (order_id) REFERENCES consumer.orders (id) ON DELETE NO ACTION ON UPDATE NO ACTION
+  CONSTRAINT transfers_order_id_fk FOREIGN KEY (order_id) REFERENCES consumer.orders (id) ON DELETE NO ACTION ON UPDATE NO ACTION,
+  CONSTRAINT transfers_ledger_id_fk FOREIGN KEY (ledger_id) REFERENCES wallet.ledger (id) ON DELETE NO ACTION ON UPDATE NO ACTION
 );
 CREATE INDEX "transfers_idx_transfers_type" ON wallet."transfers" ("type");
 CREATE INDEX "transfers_idx_transfers_from_wallet_id" ON wallet."transfers" ("from_wallet_id");
