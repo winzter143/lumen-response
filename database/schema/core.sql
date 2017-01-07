@@ -51,6 +51,7 @@ CREATE TABLE core.parties
   created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_by INT,
   updated_at TIMESTAMP WITH TIME ZONE,
+  last_disbursed_at TIMESTAMP WITH TIME ZONE,
   PRIMARY KEY (id)
 );
 CREATE INDEX parties_type_idx ON core.parties (type);
