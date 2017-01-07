@@ -40,6 +40,7 @@ CREATE TABLE wallet."transfers" (
   "details" text NOT NULL ,
   "ip_address" text ,
   "order_id" integer ,
+  "order_id" integer ,
   "created_by" integer ,
   "created_at" timestamp with time zone NOT NULL DEFAULT current_timestamp ,
   PRIMARY KEY ("id") ,
@@ -68,3 +69,31 @@ CREATE TABLE wallet."wallet_logs" (
 CREATE UNIQUE INDEX "wallet_logs_idx_wallet_logs_wallet_id_transfer_id_uk" ON wallet."wallet_logs" ("wallet_id","transfer_id");
 CREATE INDEX "wallet_logs_idx_wallet_logs_wallet_id" ON wallet."wallet_logs" ("wallet_id");
 CREATE INDEX "wallet_logs_idx_wallet_logs_transfer_id" ON wallet."wallet_logs" ("transfer_id");
+
+--
+-- Table structure for table ledger
+--
+CREATE TYPE wallet."ledger_enum_type" as enum('payable', 'receivable');
+CREATE TYPE wallet."ledger_enum_status" as enum('pending', 'settled');
+CREATE TABLE wallet."ledger" (
+  "id" serial,
+  "party_id" integer NOT NULL,
+  "settlement_transfer_id" integer NOT NULL,
+  "type" wallet."ledger_enum_type" NOT NULL,
+  "status" wallet."ledger_enum_status" NOT NULL DEFAULT 'pending',
+  "amount" numeric(14, 2) NOT NULL,
+  "breakdown" jsonb,
+  "reference_id" varchar(100),
+  "bank_details" jsonb,
+  "remarks" TEXT,
+  "period" tstzrange NOT NULL,
+  "closed_at" timestamp with time zone NOT NULL,
+  "settled_at" timestamp with time zone,
+  "settled_by" integer,
+  "created_at" timestamp with time zone NOT NULL DEFAULT current_timestamp,
+  PRIMARY KEY ("id"),
+  CONSTRAINT ledger_party_id_fk FOREIGN KEY (party_id) REFERENCES core.parties (id) ON DELETE NO ACTION ON UPDATE NO ACTION,
+  CONSTRAINT ledger_settlement_transfer_id_fk FOREIGN KEY (settlement_transfer_id) REFERENCES wallet.transfers (id) ON DELETE NO ACTION ON UPDATE NO ACTION
+);
+CREATE UNIQUE INDEX "ledger_idx_party_id_type_closed_at_uk" ON wallet."ledger" ("party_id", "type", "closed_at");
+CREATE INDEX "ledger_idx_closed_at" ON wallet."transfers" ("created_at");
