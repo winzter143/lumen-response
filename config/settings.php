@@ -26,7 +26,21 @@ return [
             'claim_period' => 7,
             // If set to true, F3 creates and unpaid charge object even for prepaid orders.
             // Otherwise, F3 creates a charge object for COD orders only.
-            'fuse_client' => false
+            'fuse_client' => false,
+            'disbursal' => [
+                // http://php.net/manual/en/function.date.php
+                // 0 - Sun.
+                // 6 - Sat.
+                'every' => [
+                    // Day of week to process the disbursement.
+                    'day' => 1,
+                ],
+                'period' => [
+                    // Period covered.
+                    'from' => 1,
+                    'to' => 0
+                ]
+            ],
         ],
         'tracker' => [
             'failures' => 0,
@@ -106,6 +120,16 @@ return [
         'verified' => 'Verfied',
         'settled' => 'Settled',
         'declined' => 'Declined'
+    ],
+    // List of ledger entry statuses.
+    'ledger_entry_statuses' => [
+        'pending' => 'Pending',
+        'settled' => 'Settled'
+    ],
+    // List of ledger entry types.
+    'ledger_entry_types' => [
+        'payable' => 'Payable',
+        'receivable' => 'Receivable'
     ],
     // List of payment methods and their display names.
     'payment_methods' => [
