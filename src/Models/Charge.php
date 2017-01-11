@@ -147,7 +147,7 @@ class Charge extends Model
         }
 
         // Add the tracking number to the description.
-        $details = 'Funds for COD order #' . $this->order->tracking_number;
+        $details = 'Collection for COD order #' . $this->order->tracking_number;
 
         // Transfer the total from the system's collection wallet to the client's fund wallet.
         return Wallet::transfer(config('settings.system_party_id'), $this->order->party_id, 'collections', 'fund', $this->order->currency->code, $this->total_amount, 'collection', $details, $this->order_id, $ip_address);
