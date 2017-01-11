@@ -79,7 +79,7 @@ CREATE TYPE wallet."ledger_enum_status" as enum('pending', 'settled');
 CREATE TABLE wallet."ledger" (
   "id" serial,
   "party_id" integer NOT NULL,
-  "settlement_transfer_id" integer NOT NULL,
+  "settlement_transfer_id" integer,
   "type" wallet."ledger_enum_type" NOT NULL,
   "status" wallet."ledger_enum_status" NOT NULL DEFAULT 'pending',
   "amount" numeric(14, 2) NOT NULL,
