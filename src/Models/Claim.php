@@ -16,7 +16,7 @@ class Claim extends Model
      * The attributes that are mass assignable.
      * @var array
      */
-    protected $fillable = ['order_id', 'status', 'reason', 'amount', 'shipping_fee_flag', 'insurance_fee_flag', 'transaction_fee_flag', 'assets', 'remarks', 'created_at', 'created_by', 'updated_at', 'updated_by', 'request_number', 'tat', 'reference_id'];
+    protected $fillable = ['order_id', 'status', 'reason', 'amount', 'shipping_fee_flag', 'insurance_fee_flag', 'transaction_fee_flag', 'assets', 'remarks', 'created_at', 'created_by', 'updated_at', 'updated_by', 'tat', 'reference_id'];
 
     /**
      * The table's primary key.
@@ -39,7 +39,6 @@ class Claim extends Model
         // Set the validation rules.
         $rules = [
             'order_id' => 'integer|required|exists:pgsql.consumer.orders,id',
-            'request_number' => 'string|required|max:15',
             'reference_id' => 'string|nullable|max:100',
             'status' => 'string|in:pending,verified,settled,declined',
             'reason' => 'string|required',
@@ -119,7 +118,6 @@ class Claim extends Model
             // Build the list of attributes to be saved.
             $attributes = [
                 'order_id' => $order_id,
-                'request_number' => self::getRequestNumber($order_id),
                 'reference_id' => $reference_id,
                 'amount' => $amount,
                 'reason' => $reason,
@@ -272,16 +270,5 @@ class Claim extends Model
     public function declined($remarks)
     {
         return $this->setStatus('declined', $remarks);
-    }
-
-    /**
-     * Generates a request number from the given order ID.
-     * @param int $order_id
-     */
-    public static function getRequestNumber($order_id)
-    {
-        // Generate the request number, in format XXXX-XXXX (eg, 0000-0001-ACLZ)
-        // Note we exclude I and O in the list so as not to confuse them with 1 and 0.
-        return implode("-", str_split(str_pad($order_id, 8, "0", STR_PAD_LEFT) . substr(str_shuffle("ABCDEFGHJKLMNPQRSTUVWXYZ"), 0, 4), 4));
     }
 }

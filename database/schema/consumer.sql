@@ -183,7 +183,6 @@ CREATE TYPE consumer.claim_status AS ENUM ('pending', 'verified', 'settled', 'de
 CREATE TABLE consumer.claims
 (
   order_id INT NOT NULL,
-  request_number VARCHAR(15) NOT NULL,
   reference_id VARCHAR(100),
   status consumer.claim_status NOT NULL DEFAULT 'pending',
   amount NUMERIC(14, 2) NOT NULL,
@@ -199,6 +198,5 @@ CREATE TABLE consumer.claims
   updated_at TIMESTAMP WITH TIME ZONE,
   updated_by INT,
   PRIMARY KEY (order_id),
-  CONSTRAINT claims_order_id_fk FOREIGN KEY (order_id) REFERENCES consumer.orders(id) ON DELETE NO ACTION ON UPDATE NO ACTION,
-  CONSTRAINT claims_request_number_uk UNIQUE (request_number)
+  CONSTRAINT claims_order_id_fk FOREIGN KEY (order_id) REFERENCES consumer.orders(id) ON DELETE NO ACTION ON UPDATE NO ACTION
 );
