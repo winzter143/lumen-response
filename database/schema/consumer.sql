@@ -50,7 +50,7 @@ CREATE TABLE consumer.orders
   remarks TEXT,
   pickup_attempts SMALLINT NOT NULL DEFAULT 0,
   delivery_attempts SMALLINT NOT NULL DEFAULT 0,
-  status_updated_at TIMESTAMP WITH TIME ZONE,
+  status_updated_at TIMESTAMP WITH TIME ZONE NOT NULL,
   flagged SMALLINT NOT NULL DEFAULT 0,
   created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_by INT,
@@ -67,6 +67,7 @@ CREATE TABLE consumer.orders
 CREATE INDEX orders_buyer_name_fts_idx ON consumer.orders USING gin(to_tsvector('english', buyer_name));
 CREATE INDEX orders_email_fts_idx ON consumer.orders USING gin(to_tsvector('english', email));
 CREATE INDEX orders_contact_number_fts_idx ON consumer.orders USING gin(to_tsvector('english', contact_number));
+CREATE INDEX orders_status_updated_at_idx ON consumer.orders (status_updated_at);
 
 --
 -- Table structure for table orders
