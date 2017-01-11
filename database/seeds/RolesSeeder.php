@@ -15,7 +15,7 @@ class RolesSeeder extends Seeder
         'finance' => [
             'name' => 'finance',
             'display_name' => 'Finance',
-            'permissions' => ['view-overview', 'create-order', 'view-order', 'view-orders', 'edit-order', 'upload-orders', 'create-claim', 'view-claim', 'view-claims', 'edit-claim', 'view-wallets', 'view-wallet', 'view-transfers', 'view-transfer', 'view-payouts', 'view-payout', 'create-bank-account', 'view-bank-accounts', 'view-bank-account', 'edit-bank-account', 'delete-bank-account', 'manage-party', 'view-transactions', 'view-transaction', 'upload-transactions'],
+            'permissions' => ['view-overview', 'create-order', 'view-order', 'view-orders', 'edit-order', 'upload-orders', 'create-claim', 'view-claim', 'view-claims', 'edit-claim', 'view-wallets', 'view-wallet', 'view-transfers', 'view-transfer', 'view-payouts', 'view-payout', 'create-bank-account', 'view-bank-accounts', 'view-bank-account', 'edit-bank-account', 'delete-bank-account', 'manage-party', 'view-transactions', 'view-transaction', 'upload-transactions', 'view-ledger-entries', 'view-ledger-entry'],
         ],
         'oms' => [
             'name' => 'oms',
@@ -25,7 +25,7 @@ class RolesSeeder extends Seeder
         'client' => [
             'name' => 'client',
             'display_name' => 'Client System',
-            'permissions' => ['create-order', 'view-order', 'view-orders', 'edit-order', 'view-wallets', 'view-wallet', 'view-transfers', 'view-transfer', 'view-payouts', 'view-payout', 'create-bank-account', 'view-bank-accounts', 'view-bank-account', 'edit-bank-account', 'delete-bank-account', 'view-claims', 'view-claim'],
+            'permissions' => ['create-order', 'view-order', 'view-orders', 'edit-order', 'view-wallets', 'view-wallet', 'view-transfers', 'view-transfer', 'view-payouts', 'view-payout', 'create-bank-account', 'view-bank-accounts', 'view-bank-account', 'edit-bank-account', 'delete-bank-account', 'view-claims', 'view-claim', 'view-ledger-entries', 'view-ledger-entry'],
         ],
         'courier' => [
             'name' => 'courier',
